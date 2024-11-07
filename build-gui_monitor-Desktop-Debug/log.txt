@@ -1,0 +1,7 @@
+ср нояб. 6 23:06:29 2024: Загружена сигнатура: description--->pattern
+ср нояб. 6 23:06:29 2024: Загружена сигнатура: Example malware signature--->pattern1
+ср нояб. 6 23:06:29 2024: Загружена сигнатура: Example virus signature--->pattern2
+ср нояб. 6 23:06:29 2024: Начинаем мониторинг папки: /home/vladimir/Загрузки/Anne/Monitor
+ср нояб. 6 23:06:29 2024: Добавлен для мониторинга: /home/vladimir/Загрузки/Anne/Monitor/extracted_lines.txt
+ср нояб. 6 23:06:29 2024: Добавлен для мониторинга: /home/vladimir/Загрузки/Anne/Monitor/monitor.cpp
+ср нояб. 6 23:06:33 2024: Мониторинг был остановлен

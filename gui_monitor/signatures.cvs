@@ -1,0 +1,4 @@
+id,type,description,pattern,isRegex
+1,malware,Example malware signature,pattern1,true
+2,virus,Example virus signature,pattern2,false
+
