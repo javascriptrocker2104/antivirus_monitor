@@ -2,12 +2,21 @@
 #define FILEMONITOR_H
 
 #include <QObject>
-#include <QVector>
-#include <QString>
 #include <QFileSystemWatcher>
-#include <QTimer> // Добавьте этот заголовок для таймера
+#include <QString>
+#include <QVector>
+#include <QDir>
+#include <QFile>
+#include <QTextStream>
+#include <QStringList>
+#include <QDebug>
+#include <QDateTime>
+#include <QRegularExpression>
+#include <QMessageBox>
+#include <QProcess>
+#include <QTimer>
 
-// Определение структуры Signature
+// Define the Signature struct
 struct Signature {
     QString id;
     QString type;
@@ -18,33 +27,41 @@ struct Signature {
 
 class FileMonitor : public QObject {
     Q_OBJECT
-private:
-    QVector<Signature> signatures;
-    QString directoryPath;
-    QStringList previousFilesList;
-    QFileSystemWatcher *watcher;
-    QTimer *scanTimer; // Таймер для периодического сканирования
-    QStringList infectedFiles;
-
 
 public:
     explicit FileMonitor(const QString& path, QObject *parent = nullptr);
     void startMonitoring();
-    void scanDirectory(const QString& dirPath);
-    void onFileChanged(const QString& path);
-    void onFileCreated(const QString& path);
-    void onDirectoryChanged(const QString& path);
-    bool isInfected(const QString& filePath);
-    void handleInfection(const QString& filePath);
-    void loadSignatures(const QString& filename);
-    void log(const QString& message);
     void stopMonitoring();
-    QStringList getInfectedFiles() const;
 
 signals:
-    void fileChanged(const QString& path);
+    void fileChanged(const QString &path);
+    void directoryChanged(const QString &path);
     void fileCreated(const QString& path);
-    void DirectoryChanged(const QString& path);
+    void fileDeleted(const QString& path);
+
+private slots:
+    void onFileChanged(const QString& path);
+    void onDirectoryChanged(const QString& path);
+
+private:
+    void scanDirectory(const QString& dirPath);
+    bool isInfected(const QString& filePath);
+    void handleInfection(const QString& filePath);
+    void promptUser (const QString& filePath);
+    void moveToQuarantine(const QString& filePath);
+    bool archiveWithPassword(const QString& filePath);
+    void loadSignatures(const QString& filename);
+    void log(const QString& message);
+    bool isFileClosed(const QString& filePath); // Новый метод для проверки, закрыт ли файл
+
+    QString directoryPath;
+    QFileSystemWatcher *watcher;
+    QVector<Signature> signatures;
+    QStringList previousFilesList;
+    QStringList infectedFiles;
+    QStringList getInfectedFiles() const;
+    QFile* currentFile;
+    QTimer* timer;
 };
 
 #endif // FILEMONITOR_H

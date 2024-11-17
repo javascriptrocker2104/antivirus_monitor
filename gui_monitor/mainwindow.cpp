@@ -9,6 +9,8 @@
 #include <QFileSystemWatcher>
 #include <QListWidgetItem>
 #include <QFileDialog>
+#include <QDesktopServices>
+#include <QUrl>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -39,18 +41,21 @@ void MainWindow::updateLogFile(const QString& filePath) {
         return;
     }
 
-    //ui->listWidget->clear(); // Очистить предыдущие элементы
+    ui->listWidget->clear(); // Очистить предыдущие элементы
 
     QTextStream in(&file);
     while (!in.atEnd()) {
         QString line = in.readLine();
-        QListWidgetItem* item = new QListWidgetItem(line);
-        ui->listWidget->addItem(item); // Добавить элемент в QListWidget
+        if (!line.isEmpty()) { // Проверяем, что строка не пустая
+            QListWidgetItem* item = new QListWidgetItem(line);
+            ui->listWidget->addItem(item); // Добавить элемент в QListWidget
+        }
     }
     ui->listWidget->scrollToBottom();
 
     file.close(); // Закрыть файл
 }
+
 
 void MainWindow::on_selectFolderButton_clicked() {
     selectedFolder = QFileDialog::getExistingDirectory(this, "Select Folder", QString());
@@ -67,7 +72,7 @@ void MainWindow::on_selectFolderButton_clicked() {
 }
 
 void MainWindow::on_fileChanged(const QString& filePath) {
-    QMessageBox::warning(this, "Infected File Detected", "Infected file detected: " + filePath);
+    //QMessageBox::warning(this, "Warning", "File was changed: " + filePath);
     // Здесь можно обновить интерфейс или отобразить список зараженных файлов
 }
 
@@ -85,11 +90,13 @@ void MainWindow::on_stopButton_clicked()
 
 void MainWindow::on_pushButton_clicked()
 {
-    // Создаем новый экземпляр диалога каждый раз при нажатии на кнопку
+    QString quarantineFolderPath = "/home/vladimir/Загрузки/Anne/Карантин"; // Укажите путь к папке карантин
+        QDesktopServices::openUrl(QUrl::fromLocalFile(quarantineFolderPath));
+    /* //Создаем новый экземпляр диалога каждый раз при нажатии на кнопку
     Quarantine *quarantine = new Quarantine(this);
     quarantine->setAttribute(Qt::WA_DeleteOnClose); // Автоматическое удаление при закрытии
     quarantine->move(100, 100); // Устанавливаем позицию окна
     quarantine->show(); // Показываем окно
     quarantine->raise(); // Поднимаем окно на передний план
-    quarantine->activateWindow(); // Активируем окно
+    quarantine->activateWindow(); // Активируем окно*/
 }

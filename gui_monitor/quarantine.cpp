@@ -8,7 +8,7 @@
 #include <QDebug>
 
 Quarantine::Quarantine(QWidget *parent) :
-    QDialog(parent), // Теперь это правильно
+    QDialog(parent),
     ui(new Ui::Quarantine),
     fileWatcher(new QFileSystemWatcher(this)) // Инициализация fileWatcher
 {
