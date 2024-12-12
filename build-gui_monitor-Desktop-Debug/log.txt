@@ -1,24 +1,25 @@
-вс нояб. 17 17:32:39 2024: Начинаем мониторинг папки: /home/vladimir/Загрузки/Anne/testirovany
-вс нояб. 17 17:32:50 2024: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/wщщкдщсл
-вс нояб. 17 17:33:01 2024: Мониторинг был остановлен
-вс нояб. 17 17:33:07 2024: Начинаем мониторинг папки: /home/vladimir/Загрузки/Anne/testirovany
-вс нояб. 17 17:33:21 2024: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/wщщкдщсл
-вс нояб. 17 17:33:27 2024: Мониторинг был остановлен
-вс нояб. 17 17:33:31 2024: Начинаем мониторинг папки: /home/vladimir/Загрузки/Anne/testirovany
-вс нояб. 17 17:33:43 2024: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/wщщкдщсл
-вс нояб. 17 17:33:45 2024: Обработан инфицированный файл: /home/vladimir/Загрузки/Anne/testirovany/wщщкдщсл
-вс нояб. 17 17:33:50 2024: Мониторинг был остановлен
-вс нояб. 17 17:33:55 2024: Начинаем мониторинг папки: /home/vladimir/Загрузки/Anne/testirovany
-вс нояб. 17 17:34:04 2024: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/wщщкдщсл
-вс нояб. 17 17:34:08 2024: Мониторинг был остановлен
-вс нояб. 17 17:41:03 2024: Начинаем мониторинг папки: /home/vladimir/Загрузки/Anne/testirovany
-вс нояб. 17 17:41:08 2024: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/wщщкдщсл
-вс нояб. 17 17:41:22 2024: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/ghk
-вс нояб. 17 17:41:27 2024: Инфицированный файл был удален: /home/vladimir/Загрузки/Anne/testirovany/ghk
-вс нояб. 17 17:41:33 2024: Мониторинг был остановлен
-вс нояб. 17 17:42:16 2024: Начинаем мониторинг папки: /home/vladimir/Загрузки/Anne/virus
-вс нояб. 17 17:42:24 2024: Изменение файла: /home/vladimir/Загрузки/Anne/virus/fdgdgersdg
-вс нояб. 17 17:42:31 2024: Мониторинг был остановлен
-вс нояб. 17 18:03:13 2024: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/virus
-вс нояб. 17 18:03:23 2024: Изменение файла: /home/vladimir/Загрузки/Anne/virus/anne
-вс нояб. 17 18:03:28 2024: Мониторинг был остановлен
+ср дек. 11 13:17:48 2024: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
+ср дек. 11 13:18:32 2024: Warning: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/test
+ср дек. 11 13:18:32 2024: Warning: Файл перемещен в карантин: /home/vladimir/Загрузки/Anne/Карантин/test/clean_test
+ср дек. 11 13:18:32 2024: Warning: Папка успешно заархивирована с паролем: /home/vladimir/Загрузки/Anne/Карантин/test.zip
+ср дек. 11 13:25:09 2024: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
+ср дек. 11 13:25:23 2024: Warning: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/gyewgvd
+ср дек. 11 13:25:23 2024: Warning: Инфицированный файл был проигнорирован: /home/vladimir/Загрузки/Anne/testirovany/gyewgvd
+ср дек. 11 13:31:48 2024: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
+ср дек. 11 13:32:08 2024: Warning: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/virus
+ср дек. 11 13:32:08 2024: Warning: Инфицированный файл был проигнорирован: /home/vladimir/Загрузки/Anne/testirovany/virus
+ср дек. 11 13:33:58 2024: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
+ср дек. 11 13:34:11 2024: Warning: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/virus
+ср дек. 11 13:34:11 2024: Warning: Файл перемещен в карантин: /home/vladimir/Загрузки/Anne/Карантин/virus/clean_virus
+ср дек. 11 13:34:11 2024: Warning: Папка успешно заархивирована с паролем: /home/vladimir/Загрузки/Anne/Карантин/virus.zip
+ср дек. 11 13:36:05 2024: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
+ср дек. 11 13:36:25 2024: Warning: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/gyewgvd
+ср дек. 11 13:36:25 2024: Warning: Инфицированный файл был удален: /home/vladimir/Загрузки/Anne/testirovany/gyewgvd
+чт дек. 12 08:57:09 2024: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
+чт дек. 12 08:57:22 2024: Мониторинг был остановлен
+чт дек. 12 08:59:51 2024: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
+чт дек. 12 09:00:04 2024: Warning: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/test
+чт дек. 12 09:00:04 2024: Error: Обработан инфицированный файл: /home/vladimir/Загрузки/Anne/testirovany/test
+чт дек. 12 09:00:31 2024: Warning: Изменение файла: /home/vladimir/Загрузки/Anne/testirovany/virus
+чт дек. 12 09:00:31 2024: Warning: Инфицированный файл был проигнорирован: /home/vladimir/Загрузки/Anne/testirovany/virus
+чт дек. 12 09:00:51 2024: Мониторинг был остановлен

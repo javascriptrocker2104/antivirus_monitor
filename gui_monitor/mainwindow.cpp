@@ -11,13 +11,18 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QMenuBar>
+#include <QMenu>
+#include <QAction>
+#include "actiondialog.h"
+#include "filemonitor.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , fileWatcher(new QFileSystemWatcher(this)) // Инициализация fileWatcher
     , fileMonitor(nullptr) // Инициализация fileMonitor
-    , quarantine(nullptr)
+    , defaultAction(Heal)
 {
     ui->setupUi(this);
     this->setWindowTitle("Антивирусный монитор");
@@ -28,11 +33,24 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Загружаем записи из файла
     updateLogFile("log.txt");
+
+    // Создание меню
+    QMenuBar *menuBar = this->menuBar();
+    QMenu *fileMenu = menuBar->addMenu("Файл");
+
+    // Добавление действий
+    QAction *settingsAction = fileMenu->addAction("Настройки");
+    QAction *exitAction = fileMenu->addAction("Выход");
+
+    // Подключение сигналов
+    connect(settingsAction, &QAction::triggered, this, &MainWindow::Settings); // Подключение действия к слоту
+    connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
 }
 
 MainWindow::~MainWindow() {
     delete ui;
 }
+
 
 void MainWindow::updateLogFile(const QString& filePath) {
     QFile file(filePath);
@@ -43,18 +61,40 @@ void MainWindow::updateLogFile(const QString& filePath) {
 
     ui->listWidget->clear(); // Очистить предыдущие элементы
 
+    QMap<QString, QBrush> typeBrushes;
+    typeBrushes["Error"] = QBrush(Qt::red);
+    typeBrushes["Warning"] = QBrush(Qt::yellow);
+    typeBrushes["Info"] = QBrush(Qt::blue);
+    QRegExp typeExp("^[а-яА-Я]{2,3} \\w+ \\d{1,2} \\d{2}:\\d{2}:\\d{2} \\d{4}: (\\w+):"); // Регулярное выражение для поиска типа
     QTextStream in(&file);
+
     while (!in.atEnd()) {
         QString line = in.readLine();
-        if (!line.isEmpty()) { // Проверяем, что строка не пустая
-            QListWidgetItem* item = new QListWidgetItem(line);
-            ui->listWidget->addItem(item); // Добавить элемент в QListWidget
+        if (!line.isEmpty()) {
+            // Применяем регулярное выражение к строке
+            if (typeExp.indexIn(line) != -1) {
+                QString type = typeExp.cap(1); // Получаем тип
+                QBrush brush = typeBrushes.value(type, QBrush(Qt::black)); // Получение соответствующего цвета
+
+                // Отладочный вывод
+                qDebug() << "Found type:" << type << "Color:" << brush.color();
+
+                // Создание и настройка элемента списка
+                QListWidgetItem* item = new QListWidgetItem(line);
+                item->setForeground(brush);
+                ui->listWidget->addItem(item);
+            } else {
+                // Если тип не найден, можно добавить элемент с черным текстом
+                QListWidgetItem* item = new QListWidgetItem(line);
+                item->setForeground(QBrush(Qt::black));
+                ui->listWidget->addItem(item);
+            }
         }
     }
     ui->listWidget->scrollToBottom();
-
     file.close(); // Закрыть файл
 }
+
 
 
 void MainWindow::on_selectFolderButton_clicked() {
@@ -72,12 +112,12 @@ void MainWindow::on_selectFolderButton_clicked() {
 }
 
 void MainWindow::on_fileChanged(const QString& filePath) {
-    //QMessageBox::warning(this, "Warning", "File was changed: " + filePath);
+    Q_UNUSED(filePath);
     // Здесь можно обновить интерфейс или отобразить список зараженных файлов
+    // Удалено: showActionDialog();
 }
 
-void MainWindow::on_stopButton_clicked()
-{
+void MainWindow::on_stopButton_clicked() {
     if (fileMonitor) {
         fileMonitor->stopMonitoring(); // Предполагается, что у вас есть метод stopMonitoring в классе FileMonitor
         delete fileMonitor; // Удаляем объект, если он больше не нужен
@@ -88,15 +128,32 @@ void MainWindow::on_stopButton_clicked()
     }
 }
 
-void MainWindow::on_pushButton_clicked()
-{
+void MainWindow::on_pushButton_clicked() {
     QString quarantineFolderPath = "/home/vladimir/Загрузки/Anne/Карантин"; // Укажите путь к папке карантин
-        QDesktopServices::openUrl(QUrl::fromLocalFile(quarantineFolderPath));
-    /* //Создаем новый экземпляр диалога каждый раз при нажатии на кнопку
-    Quarantine *quarantine = new Quarantine(this);
-    quarantine->setAttribute(Qt::WA_DeleteOnClose); // Автоматическое удаление при закрытии
-    quarantine->move(100, 100); // Устанавливаем позицию окна
-    quarantine->show(); // Показываем окно
-    quarantine->raise(); // Поднимаем окно на передний план
-    quarantine->activateWindow(); // Активируем окно*/
+    QDesktopServices::openUrl(QUrl::fromLocalFile(quarantineFolderPath));
 }
+
+void MainWindow::Settings() {
+    ActionDialog dialog(this); // Создаем экземпляр ActionDialog
+    if (dialog.exec() == QDialog::Accepted) {
+        QString selectedAction = dialog.selectedAction();
+        QMessageBox::information(this, "Выбор действия", "Вы выбрали: " + selectedAction);
+
+        // Обновите defaultAction в зависимости от выбора пользователя
+        if (selectedAction == "Удалить файл") {
+            defaultAction = Delete;
+        } else if (selectedAction == "Карантин") {
+            defaultAction = Quarantine;
+        } else if (selectedAction == "Игнорировать") {
+            defaultAction = Ignore;
+        } else if (selectedAction == "Вылечить") {
+            defaultAction = Heal;
+        }
+
+        // Устанавливаем действие в FileMonitor
+        if (fileMonitor) {
+            fileMonitor->setDefaultAction(defaultAction);
+        }
+    }
+}
+

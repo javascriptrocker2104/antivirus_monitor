@@ -22,7 +22,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
     QByteArrayData data[8];
-    char stringdata0[124];
+    char stringdata0[119];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -36,14 +36,14 @@ QT_MOC_LITERAL(1, 11, 29), // "on_selectFolderButton_clicked"
 QT_MOC_LITERAL(2, 41, 0), // ""
 QT_MOC_LITERAL(3, 42, 14), // "on_fileChanged"
 QT_MOC_LITERAL(4, 57, 8), // "filePath"
-QT_MOC_LITERAL(5, 66, 13), // "updateLogFile"
-QT_MOC_LITERAL(6, 80, 21), // "on_stopButton_clicked"
-QT_MOC_LITERAL(7, 102, 21) // "on_pushButton_clicked"
+QT_MOC_LITERAL(5, 66, 21), // "on_stopButton_clicked"
+QT_MOC_LITERAL(6, 88, 21), // "on_pushButton_clicked"
+QT_MOC_LITERAL(7, 110, 8) // "Settings"
 
     },
     "MainWindow\0on_selectFolderButton_clicked\0"
-    "\0on_fileChanged\0filePath\0updateLogFile\0"
-    "on_stopButton_clicked\0on_pushButton_clicked"
+    "\0on_fileChanged\0filePath\0on_stopButton_clicked\0"
+    "on_pushButton_clicked\0Settings"
 };
 #undef QT_MOC_LITERAL
 
@@ -63,14 +63,14 @@ static const uint qt_meta_data_MainWindow[] = {
  // slots: name, argc, parameters, tag, flags
        1,    0,   39,    2, 0x08 /* Private */,
        3,    1,   40,    2, 0x08 /* Private */,
-       5,    1,   43,    2, 0x08 /* Private */,
-       6,    0,   46,    2, 0x08 /* Private */,
-       7,    0,   47,    2, 0x08 /* Private */,
+       5,    0,   43,    2, 0x08 /* Private */,
+       6,    0,   44,    2, 0x08 /* Private */,
+       7,    0,   45,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
     QMetaType::Void, QMetaType::QString,    4,
-    QMetaType::Void, QMetaType::QString,    4,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
 
@@ -85,9 +85,9 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         switch (_id) {
         case 0: _t->on_selectFolderButton_clicked(); break;
         case 1: _t->on_fileChanged((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 2: _t->updateLogFile((*reinterpret_cast< const QString(*)>(_a[1]))); break;
-        case 3: _t->on_stopButton_clicked(); break;
-        case 4: _t->on_pushButton_clicked(); break;
+        case 2: _t->on_stopButton_clicked(); break;
+        case 3: _t->on_pushButton_clicked(); break;
+        case 4: _t->Settings(); break;
         default: ;
         }
     }

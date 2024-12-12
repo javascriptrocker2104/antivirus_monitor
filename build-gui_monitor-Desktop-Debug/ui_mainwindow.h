@@ -10,6 +10,7 @@
 #define UI_MAINWINDOW_H
 
 #include <QtCore/QVariant>
+#include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QMainWindow>
@@ -23,6 +24,8 @@ QT_BEGIN_NAMESPACE
 class Ui_MainWindow
 {
 public:
+    QAction *settingsAction;
+    QAction *exitAction;
     QWidget *centralwidget;
     QPushButton *selectFolderButton;
     QListWidget *listWidget;
@@ -36,6 +39,10 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
         MainWindow->resize(800, 600);
+        settingsAction = new QAction(MainWindow);
+        settingsAction->setObjectName(QString::fromUtf8("settingsAction"));
+        exitAction = new QAction(MainWindow);
+        exitAction->setObjectName(QString::fromUtf8("exitAction"));
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         selectFolderButton = new QPushButton(centralwidget);
@@ -53,7 +60,7 @@ public:
         stopButton->setGeometry(QRect(540, 60, 201, 23));
         pushButton = new QPushButton(centralwidget);
         pushButton->setObjectName(QString::fromUtf8("pushButton"));
-        pushButton->setGeometry(QRect(350, 60, 80, 23));
+        pushButton->setGeometry(QRect(380, 60, 80, 23));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -71,6 +78,11 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", nullptr));
+        settingsAction->setText(QApplication::translate("MainWindow", "\320\235\320\260\321\201\321\202\321\200\320\276\320\271\320\272\320\270 \320\274\320\276\320\275\320\270\321\202\320\276\321\200\320\260", nullptr));
+#ifndef QT_NO_SHORTCUT
+        settingsAction->setShortcut(QApplication::translate("MainWindow", "Ctrl+S", nullptr));
+#endif // QT_NO_SHORTCUT
+        exitAction->setText(QApplication::translate("MainWindow", "\320\222\321\213\321\205\320\276\320\264", nullptr));
         selectFolderButton->setText(QApplication::translate("MainWindow", "\320\222\321\213\320\261\321\200\320\260\321\202\321\214 \320\277\320\260\320\277\320\272\321\203 \320\264\320\273\321\217 \320\274\320\276\320\275\320\270\321\202\320\276\321\200\320\270\320\275\320\263\320\260", nullptr));
         stopButton->setText(QApplication::translate("MainWindow", "\320\236\321\201\321\202\320\260\320\275\320\276\320\262\320\270\321\202\321\214 \320\274\320\276\320\275\320\270\321\202\320\276\321\200\320\270\320\275\320\263", nullptr));
         pushButton->setText(QApplication::translate("MainWindow", "\320\232\320\260\321\200\320\260\320\275\321\202\320\270\320\275", nullptr));

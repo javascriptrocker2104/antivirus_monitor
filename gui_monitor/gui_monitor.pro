@@ -17,17 +17,20 @@ TEMPLATE = app
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    actiondialog.cpp \
     filemonitor.cpp \
     main.cpp \
     mainwindow.cpp \
     quarantine.cpp
 
 HEADERS += \
+    actiondialog.h \
     filemonitor.h \
     mainwindow.h \
     quarantine.h
 
 FORMS += \
+    ActionDialog.ui \
     mainwindow.ui \
     quarantine.ui
 

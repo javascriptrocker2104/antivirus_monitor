@@ -1,4 +1,6 @@
 #include "filemonitor.h"
+#include "actiondialog.h"
+#include "mainwindow.h"
 #include <QFile>
 #include <QDir>
 #include <QStringList>
@@ -6,10 +8,15 @@
 #include <QTimer>
 #include <QAbstractButton>
 
+
+
+//Action defaultAction;
+
 FileMonitor::FileMonitor(const QString& path, QObject *parent)
     : QObject(parent), directoryPath(path), watcher(new QFileSystemWatcher(this)), timer(new QTimer(this)) {
     loadSignatures("/home/vladimir/Загрузки/Anne/gui_monitor/signatures.cvs"); // Загрузка сигнатур
     previousFilesList.clear();
+    //defaultAction = Quarantine; //по умолчанию
 }
 
 void FileMonitor::startMonitoring() {
@@ -29,7 +36,7 @@ void FileMonitor::scanDirectory(const QString& dirPath) {
         QString fullPath = dir.absoluteFilePath(file);
         if (!previousFilesList.contains(fullPath)) {
             watcher->addPath(fullPath);
-            qDebug() << "Обнаружен новый файл:" << fullPath;
+            qDebug() << "Warning: Обнаружен новый файл:" << fullPath;
             emit fileCreated(fullPath); // Сигнал о создании файла
         }
     }
@@ -39,7 +46,7 @@ void FileMonitor::scanDirectory(const QString& dirPath) {
     for (const QString& prevFile : previousFilesList) {
         if (!currentFiles.contains(QFileInfo(prevFile).fileName())) {
             filesToRemove << prevFile;
-            qDebug() << "Файл удалён:" << prevFile;
+            qDebug() << "Warning: Файл удалён:" << prevFile;
             emit fileDeleted(prevFile); // Сигнал об удалении файла
         }
     }
@@ -47,13 +54,10 @@ void FileMonitor::scanDirectory(const QString& dirPath) {
         watcher->removePath(fileToRemove);
     }
 
-
     previousFilesList = currentFiles; // Обновляем список файлов
 }
 
-
-
-void FileMonitor::onFileChanged(const QString& path) {
+/*void FileMonitor::onFileChanged(const QString& path) {
     if (!QFile::exists(path)) {
         log("Файл был удален: " + path);
         qDebug() << "Файл был удален:" << path;
@@ -74,7 +78,59 @@ void FileMonitor::onFileChanged(const QString& path) {
     } else {
         qDebug() << "Файл не инфицирован:" << path;
     }
+}*/
+
+
+void FileMonitor::onFileChanged(const QString& path) {
+    if (!QFile::exists(path)) {
+        log("Warning: Файл был удален: " + path);
+        qDebug() << "Файл был удален:" << path;
+        if (watcher->files().contains(path)) {
+            watcher->removePath(path);
+        }
+        previousFilesList.removeOne(path);
+        return; // Прекращаем выполнение, если файл не существует
+    }
+
+    emit fileChanged(path); // Эмитируем сигнал fileChanged
+
+    qDebug() << "Файл изменен. Обработка файла:" << path;
+    log("Warning: Изменение файла: " + path);
+
+    if (isInfected(path)) {
+        qDebug() << "Инфицированный файл обнаружен:" << path;
+
+        // Выполняем действие в зависимости от defaultAction
+        switch (defaultAction) {
+            case Heal:
+                handleInfection(path);
+                qDebug() << "Инфицированный файл был вылечен";
+                break;
+            case Delete:
+                if (QFile::remove(path)) {
+                    qDebug() << "Инфицированный файл был удален:" << path;
+                    log("Warning: Инфицированный файл был удален: " + path);
+                } else {
+                    qDebug() << "Ошибка удаления файла:" << path;
+                    log("Warning: Ошибка удаления файла: " + path);
+                }
+                break;
+            case Ignore:
+                log("Warning: Инфицированный файл был проигнорирован: " + path);
+                qDebug() << "Инфицированный файл не был изменен:" << path;
+                break;
+            case Quarantine:
+                moveToQuarantine(path);
+                qDebug() << "Инфицированный файл был перемещен в карантин";
+                break;
+        }
+    } else {
+        qDebug() << "Файл не инфицирован:" << path;
+    }
 }
+
+
+
 
 void FileMonitor::onDirectoryChanged(const QString& path) {
     qDebug() << "Сигнал directoryChanged сработал для:" << path;
@@ -82,8 +138,11 @@ void FileMonitor::onDirectoryChanged(const QString& path) {
     scanDirectory(path); // Сканируем директорию заново, чтобы отследить новые файлы
 }
 
+void FileMonitor::setDefaultAction(Action action) {
+    defaultAction = action; // Сохраняем выбранное действие
+}
 
-void FileMonitor::promptUser (const QString& filePath) {
+/*void FileMonitor::promptUser (const QString& filePath) {
     QMessageBox msgBox;
     msgBox.setText("Данный файл инфицирован: " + filePath);
     msgBox.setInformativeText("Что сделать с этим файлом?");
@@ -111,7 +170,7 @@ void FileMonitor::promptUser (const QString& filePath) {
         moveToQuarantine(filePath);
         qDebug() << "Инфицированный файл был перемещен в карантин";
     }
-}
+}*/
 
 void FileMonitor::moveToQuarantine(const QString& filePath) {
     QString quarantineDir = "/home/vladimir/Загрузки/Anne/Карантин"; // Укажите путь к папке карантина
@@ -184,7 +243,7 @@ void FileMonitor::moveToQuarantine(const QString& filePath) {
 
     // Удаляем исходный файл, если он больше не нужен
     QFile::remove(filePath);
-    log("Файл перемещен в карантин: " + cleanFilePath);
+    log("Warning: Файл перемещен в карантин: " + cleanFilePath);
     qDebug() << "Файл перемещен в карантин:" << cleanFilePath;
 
     // Заархивировать папку с файлами
@@ -209,11 +268,11 @@ bool FileMonitor::archiveWithPassword(const QString& folderPath) {
 
     // Проверяем статус завершения
     if (process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0) {
-        log("Папка успешно заархивирована с паролем: " + archiveFilePath);
+        log("Warning: Папка успешно заархивирована с паролем: " + archiveFilePath);
         qDebug() << "Папка успешно заархивирована:" << archiveFilePath;
         return true; // Возвращаем true для успешного архивирования
     } else {
-        log("Ошибка при архивировании папки: " + folderPath);
+        log("Warning: Ошибка при архивировании папки: " + folderPath);
         qDebug() << "Ошибка при архивировании:" << process.readAllStandardError();
         return false; // Возвращаем false в случае ошибки
     }
@@ -275,7 +334,7 @@ void FileMonitor::handleInfection(const QString& filePath) {
             for (const QString& remainingLine : lines) {
                 out << remainingLine << "\n";
             }
-            log("Обработан инфицированный файл: " + filePath);
+            log("Error: Обработан инфицированный файл: " + filePath);
             qDebug() << "Обработан инфицированный файл: " << filePath;
         } else {
             log("Ошибка открытия файла " + filePath + " для записи.");

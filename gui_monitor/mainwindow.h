@@ -1,11 +1,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "filemonitor.h" // Убедитесь, что filemonitor.h объявляет Action
 #include <QMainWindow>
 #include <QFileSystemWatcher>
+#include <QListWidgetItem>
+#include <QMap>
+#include <QBrush>
 #include <QString>
-#include "filemonitor.h"
-#include "quarantine.h"
 
 namespace Ui {
 class MainWindow;
@@ -21,17 +23,17 @@ public:
 private slots:
     void on_selectFolderButton_clicked();
     void on_fileChanged(const QString& filePath);
-    void updateLogFile(const QString& filePath);
     void on_stopButton_clicked();
     void on_pushButton_clicked();
+    void Settings();
 
 private:
     Ui::MainWindow *ui;
     QFileSystemWatcher *fileWatcher;
-    qint64 lastReadPosition; // Объявление переменной для хранения позиции
-    QString selectedFolder;
-    FileMonitor *fileMonitor;
-    Quarantine *quarantine;
+    Action defaultAction; // Объявление defaultAction как члена класса
+    FileMonitor *fileMonitor; // Объявление fileMonitor
+    QString selectedFolder; // Объявление selectedFolder
+    void updateLogFile(const QString& filePath); // Объявление updateLogFile
 };
 
 #endif // MAINWINDOW_H
