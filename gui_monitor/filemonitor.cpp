@@ -1,176 +1,131 @@
 #include "filemonitor.h"
-#include "actiondialog.h"
-#include "mainwindow.h"
 #include <QFile>
 #include <QDir>
 #include <QStringList>
 #include <QDebug>
 #include <QTimer>
-#include <QAbstractButton>
-
-
-
-//Action defaultAction;
+#include <QRegularExpression>
+#include <QProcess>
+#include <QMessageBox>
+#include <QDateTime>
 
 FileMonitor::FileMonitor(const QString& path, QObject *parent)
     : QObject(parent), directoryPath(path), watcher(new QFileSystemWatcher(this)), timer(new QTimer(this)) {
-    loadSignatures("/home/vladimir/Загрузки/Anne/gui_monitor/signatures.cvs"); // Загрузка сигнатур
-    previousFilesList.clear();
-    //defaultAction = Quarantine; //по умолчанию
+    loadSignatures("/home/vladimir/Загрузки/Anne/gui_monitor/signatures.cvs");
+    loadPreviousFilesList();
+    processingQueue = QQueue<QString>();
+    connect(timer, &QTimer::timeout, this, &FileMonitor::scanDirectory); // Исправлено
+    timer->start(1000); // Пересканировать каждую 1 секунду. Настройте по необходимости.
 }
 
 void FileMonitor::startMonitoring() {
     log("Мониторинг папки начат: " + directoryPath);
     qDebug() << "Мониторинг папки начат:" << directoryPath;
-    scanDirectory(directoryPath); // Первоначальное сканирование
+    scanDirectory();
     connect(watcher, &QFileSystemWatcher::fileChanged, this, &FileMonitor::onFileChanged);
     connect(watcher, &QFileSystemWatcher::directoryChanged, this, &FileMonitor::onDirectoryChanged);
 }
 
-void FileMonitor::scanDirectory(const QString& dirPath) {
-    QDir dir(dirPath);
+void FileMonitor::scanDirectory() {
+    QDir dir(directoryPath);
     QStringList currentFiles = dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
 
-    // Находим новые файлы
+    // Добавление уже существующих файлов в QFileSystemWatcher
     for (const QString& file : currentFiles) {
         QString fullPath = dir.absoluteFilePath(file);
         if (!previousFilesList.contains(fullPath)) {
             watcher->addPath(fullPath);
-            qDebug() << "Warning: Обнаружен новый файл:" << fullPath;
-            emit fileCreated(fullPath); // Сигнал о создании файла
+            qDebug() << "Обнаружен новый файл:" << fullPath;
+            log("Обнаружен новый файл: " + fullPath);
+            previousFilesList.append(fullPath);
+            processingQueue.enqueue(fullPath);
+            if (processingQueue.size() == 1) {
+                processNextFile();
+            }
+        } else {
+            // Если файл уже существует, добавляем его в watcher, если он еще не добавлен
+            if (!watcher->files().contains(fullPath)) {
+                watcher->addPath(fullPath);
+                qDebug() << "Добавление существующего файла в монитор:" << fullPath;
+            }
         }
     }
 
-    // Находим удалённые файлы
-    QStringList filesToRemove;
-    for (const QString& prevFile : previousFilesList) {
-        if (!currentFiles.contains(QFileInfo(prevFile).fileName())) {
-            filesToRemove << prevFile;
-            qDebug() << "Warning: Файл удалён:" << prevFile;
-            emit fileDeleted(prevFile); // Сигнал об удалении файла
+    // Проверка на удаленные файлы
+    for (const QString& previousFile : previousFilesList) {
+        if (!currentFiles.contains(QFileInfo(previousFile).fileName())) {
+            onFileRemoved(previousFile);
         }
     }
-    for (const QString& fileToRemove : filesToRemove) {
-        watcher->removePath(fileToRemove);
-    }
 
-    previousFilesList = currentFiles; // Обновляем список файлов
+    savePreviousFilesList();
 }
-
-/*void FileMonitor::onFileChanged(const QString& path) {
-    if (!QFile::exists(path)) {
-        log("Файл был удален: " + path);
-        qDebug() << "Файл был удален:" << path;
-        // Удаляем путь из QFileSystemWatcher
-        if (watcher->files().contains(path)) { // Проверяем, отслеживается ли файл
-            watcher->removePath(path);
-        }
-        previousFilesList.removeOne(path);
-        return; // Прекращаем выполнение, если файл не существует
-    }
-    emit fileChanged(path); // Эмитируем сигнал fileChanged
-
-    qDebug() << "Файл изменен. Обработка файла:" << path;
-    log("Изменение файла: " + path);
-
-    if (isInfected(path)) {
-        promptUser (path); // Предлагаем пользователю действия с инфицированным файлом
-    } else {
-        qDebug() << "Файл не инфицирован:" << path;
-    }
-}*/
-
 
 void FileMonitor::onFileChanged(const QString& path) {
     if (!QFile::exists(path)) {
-        log("Warning: Файл был удален: " + path);
-        qDebug() << "Файл был удален:" << path;
-        if (watcher->files().contains(path)) {
-            watcher->removePath(path);
-        }
-        previousFilesList.removeOne(path);
-        return; // Прекращаем выполнение, если файл не существует
+        return; // Если файл не существует, выход
     }
-
-    emit fileChanged(path); // Эмитируем сигнал fileChanged
-
-    qDebug() << "Файл изменен. Обработка файла:" << path;
-    log("Warning: Изменение файла: " + path);
-
-    if (isInfected(path)) {
-        qDebug() << "Инфицированный файл обнаружен:" << path;
-
-        // Выполняем действие в зависимости от defaultAction
-        switch (defaultAction) {
-            case Heal:
-                handleInfection(path);
-                qDebug() << "Инфицированный файл был вылечен";
-                break;
-            case Delete:
-                if (QFile::remove(path)) {
-                    qDebug() << "Инфицированный файл был удален:" << path;
-                    log("Warning: Инфицированный файл был удален: " + path);
-                } else {
-                    qDebug() << "Ошибка удаления файла:" << path;
-                    log("Warning: Ошибка удаления файла: " + path);
-                }
-                break;
-            case Ignore:
-                log("Warning: Инфицированный файл был проигнорирован: " + path);
-                qDebug() << "Инфицированный файл не был изменен:" << path;
-                break;
-            case Quarantine:
-                moveToQuarantine(path);
-                qDebug() << "Инфицированный файл был перемещен в карантин";
-                break;
-        }
-    } else {
-        qDebug() << "Файл не инфицирован:" << path;
+    qDebug() << "Файл изменен. Добавление в очередь обработки:" << path;
+    log("Внимание: Файл изменен: " + path);
+    processingQueue.enqueue(path);
+    if (processingQueue.size() == 1) {
+        processNextFile();
     }
 }
 
-
-
+void FileMonitor::onFileRemoved(const QString& path) {
+    qDebug() << "Файл удален:" << path;
+    log("Внимание: Файл удален: " + path);
+    previousFilesList.removeOne(path);
+    emit fileDeleted(path);
+}
 
 void FileMonitor::onDirectoryChanged(const QString& path) {
-    qDebug() << "Сигнал directoryChanged сработал для:" << path;
     qDebug() << "Директория изменена:" << path;
-    scanDirectory(path); // Сканируем директорию заново, чтобы отследить новые файлы
+    scanDirectory();
+}
+
+void FileMonitor::processNextFile() {
+    if (processingQueue.isEmpty()) {
+        return; // Выход, если нет файлов для обработки
+    }
+
+    QString filePath = processingQueue.dequeue();
+    qDebug() << "Обработка файла:" << filePath;
+
+    // Здесь можно добавить вашу логику анализа сигнатур
+    if (isInfected(filePath)) {
+        qDebug() << "Обнаружен зараженный файл:" << filePath;
+        switch (defaultAction) {
+            case Heal:
+                handleInfection(filePath);
+                break;
+            case Delete:
+                if (!QFile::remove(filePath)) {
+                    qDebug() << "Ошибка при удалении файла:" << filePath;
+                    log("Ошибка при удалении файла: " + filePath);
+                }
+                break;
+            case Ignore:
+                log("Внимание: Зараженный файл игнорирован: " + filePath);
+                break;
+            case Quarantine:
+                moveToQuarantine(filePath);
+                break;
+        }
+    } else {
+        log("Файл чист: " + filePath); // Логирование, если файл чист
+    }
+
+    // Продолжить обработку следующего файла
+    if (!processingQueue.isEmpty()) {
+        processNextFile();
+    }
 }
 
 void FileMonitor::setDefaultAction(Action action) {
     defaultAction = action; // Сохраняем выбранное действие
 }
-
-/*void FileMonitor::promptUser (const QString& filePath) {
-    QMessageBox msgBox;
-    msgBox.setText("Данный файл инфицирован: " + filePath);
-    msgBox.setInformativeText("Что сделать с этим файлом?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Abort | QMessageBox::No | QMessageBox::Save);
-    msgBox.button(QMessageBox::Yes)->setText("Вылечить");
-    msgBox.button(QMessageBox::Abort)->setText("Удалить");
-    msgBox.button(QMessageBox::No)->setText("Не изменять");
-    msgBox.button(QMessageBox::Save)->setText("Переместить в карантин");
-    int ret = msgBox.exec();
-
-    if (ret == QMessageBox::Yes) {
-        handleInfection(filePath);
-        qDebug() << "Инфицированный файл был вылечен";
-    } else if (ret == QMessageBox::Abort) {
-        if (QFile::remove(filePath)) {
-            qDebug() << "Инфицированный файл был удален:" << filePath;
-            log("Инфицированный файл был удален: " + filePath);
-        } else {
-            qDebug() << "Ошибка удаления файла:" << filePath;
-            log("Ошибка удаления файла: " + filePath);
-        }
-    } else if (ret == QMessageBox::No) {
-        qDebug() << "Инфицированный файл не был изменен:" << filePath;
-    } else if (ret == QMessageBox::Save) {
-        moveToQuarantine(filePath);
-        qDebug() << "Инфицированный файл был перемещен в карантин";
-    }
-}*/
 
 void FileMonitor::moveToQuarantine(const QString& filePath) {
     QString quarantineDir = "/home/vladimir/Загрузки/Anne/Карантин"; // Укажите путь к папке карантина
@@ -255,8 +210,6 @@ void FileMonitor::moveToQuarantine(const QString& filePath) {
     }
 }
 
-
-
 bool FileMonitor::archiveWithPassword(const QString& folderPath) {
     QString archiveFilePath = folderPath + ".zip"; // Путь к архиву
     QString command = QString("zip -r -P pass \"%1\" \"%2\"").arg(archiveFilePath, folderPath); // Команда для архивирования
@@ -277,7 +230,6 @@ bool FileMonitor::archiveWithPassword(const QString& folderPath) {
         return false; // Возвращаем false в случае ошибки
     }
 }
-
 
 bool FileMonitor::isInfected(const QString& filePath) {
     QFile file(filePath);
@@ -362,7 +314,6 @@ void FileMonitor::loadSignatures(const QString& filename) {
                     sig.pattern = fields[3].trimmed();
                     sig.isRegex = (fields[4].trimmed().toLower() == "true");
                     signatures.append(sig); // Добавляем сигнатуру в вектор
-                    //log("Загружена сигнатура: " + sig.description + "--->" + sig.pattern); // Логируем загруженные сигнатуры
                     qDebug() << "Загружена сигнатура:" << sig.description << "--->" << sig.pattern;
                 }
             }
@@ -382,7 +333,6 @@ void FileMonitor::log(const QString& message) {
         logFile.close();
     } else {
         qDebug() << "Ошибка открытия файла логов log.txt для записи.";
-        // Вы можете также вывести сообщение в графический интерфейс
         QMessageBox::warning(nullptr, "Ошибка", "Не удалось открыть файл логов для записи.");
     }
 }
@@ -396,5 +346,34 @@ void FileMonitor::stopMonitoring() {
         watcher->removePaths(watcher->directories()); // Удаляем все пути из наблюдателя
         watcher = nullptr; // Устанавливаем указатель в nullptr
         log("Мониторинг был остановлен");
+    }
+}
+
+void FileMonitor::savePreviousFilesList() {
+    QFile file("/home/vladimir/Загрузки/Anne/gui_monitor/previous_files.txt");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        for (const QString& filePath : previousFilesList) {
+            out << filePath << "\n";
+        }
+        file.close();
+    } else {
+        qDebug() << "Ошибка открытия файла previous_files.txt для записи.";
+    }
+}
+
+void FileMonitor::loadPreviousFilesList() {
+    QFile file("/home/vladimir/Загрузки/Anne/gui_monitor/previous_files.txt");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        while (!in.atEnd()) {
+            QString line = in.readLine();
+            if (!line.isEmpty()) {
+                previousFilesList.append(line);
+            }
+        }
+        file.close();
+    } else {
+        qDebug() << "Ошибка открытия файла previous_files.txt для чтения.";
     }
 }

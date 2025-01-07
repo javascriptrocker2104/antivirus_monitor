@@ -15,6 +15,8 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QTimer>
+#include <QQueue>
+
 
 // Определение структуры Signature
 struct Signature {
@@ -45,7 +47,6 @@ public:
 signals:
     void fileChanged(const QString &path);
     void directoryChanged(const QString &path);
-    void fileCreated(const QString& path);
     void fileDeleted(const QString& path);
 
 private slots:
@@ -53,7 +54,7 @@ private slots:
     void onDirectoryChanged(const QString& path);
 
 private:
-    void scanDirectory(const QString& dirPath);
+    void scanDirectory();
     bool isInfected(const QString& filePath);
     void handleInfection(const QString& filePath);
     void promptUser  (const QString& filePath);
@@ -61,6 +62,10 @@ private:
     bool archiveWithPassword(const QString& filePath);
     void loadSignatures(const QString& filename);
     void log(const QString& message);
+    void savePreviousFilesList(); // Декларация метода для сохранения списка файлов
+    void loadPreviousFilesList(); // Декларация метода для загрузки списка файлов
+    void processNextFile();
+    void onFileRemoved(const QString& path);
 
     QString directoryPath;
     QFileSystemWatcher *watcher;
@@ -71,6 +76,7 @@ private:
     QFile* currentFile;
     QTimer* timer;
     Action defaultAction;
+    QQueue<QString> processingQueue;
 };
 
 #endif // FILEMONITOR_H

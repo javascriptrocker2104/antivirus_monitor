@@ -73,6 +73,7 @@ DIST          = ../gui_monitor/extracted_lines.txt \
 		../gui_monitor/log.txt \
 		../gui_monitor/signatures.cvs \
 		../gui_monitor/signatures.txt \
+		../gui_monitor/previous_files.txt \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -388,7 +389,6 @@ moc_filemonitor.cpp: ../gui_monitor/filemonitor.h \
 
 moc_mainwindow.cpp: ../gui_monitor/mainwindow.h \
 		../gui_monitor/filemonitor.h \
-		../gui_monitor/quarantine.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/vladimir/Загрузки/Anne/build-gui_monitor-Desktop-Debug/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/vladimir/Загрузки/Anne/gui_monitor -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../gui_monitor/mainwindow.h -o moc_mainwindow.cpp
@@ -430,18 +430,20 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 actiondialog.o: ../gui_monitor/actiondialog.cpp ../gui_monitor/actiondialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o actiondialog.o ../gui_monitor/actiondialog.cpp
 
-filemonitor.o: ../gui_monitor/filemonitor.cpp ../gui_monitor/filemonitor.h
+filemonitor.o: ../gui_monitor/filemonitor.cpp ../gui_monitor/filemonitor.h \
+		../gui_monitor/actiondialog.h \
+		../gui_monitor/mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o filemonitor.o ../gui_monitor/filemonitor.cpp
 
 main.o: ../gui_monitor/main.cpp ../gui_monitor/mainwindow.h \
-		../gui_monitor/filemonitor.h \
-		../gui_monitor/quarantine.h
+		../gui_monitor/filemonitor.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../gui_monitor/main.cpp
 
 mainwindow.o: ../gui_monitor/mainwindow.cpp ../gui_monitor/mainwindow.h \
 		../gui_monitor/filemonitor.h \
+		ui_mainwindow.h \
 		../gui_monitor/quarantine.h \
-		ui_mainwindow.h
+		../gui_monitor/actiondialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../gui_monitor/mainwindow.cpp
 
 quarantine.o: ../gui_monitor/quarantine.cpp ../gui_monitor/quarantine.h \

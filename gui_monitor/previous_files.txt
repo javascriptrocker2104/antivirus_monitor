@@ -1,0 +1,12 @@
+anne
+file
+gdh
+rest
+test
+virus
+/home/vladimir/Загрузки/Anne/testirovany/anne
+/home/vladimir/Загрузки/Anne/testirovany/file
+/home/vladimir/Загрузки/Anne/testirovany/gdh
+/home/vladimir/Загрузки/Anne/testirovany/rest
+/home/vladimir/Загрузки/Anne/testirovany/test
+/home/vladimir/Загрузки/Anne/testirovany/virus

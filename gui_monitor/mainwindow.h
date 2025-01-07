@@ -30,9 +30,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QFileSystemWatcher *fileWatcher;
     Action defaultAction; // Объявление defaultAction как члена класса
     FileMonitor *fileMonitor; // Объявление fileMonitor
+    QFileSystemWatcher *fileWatcher; // Объявление fileWatcher
     QString selectedFolder; // Объявление selectedFolder
     void updateLogFile(const QString& filePath); // Объявление updateLogFile
 };

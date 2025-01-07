@@ -46,4 +46,5 @@ DISTFILES += \
     extracted_lines.txt \
     log.txt \
     signatures.cvs \
-    signatures.txt
+    signatures.txt \
+    previous_files.txt
