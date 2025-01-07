@@ -51,7 +51,7 @@ public:
         selectFolderButton->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 170, 0);"));
         listWidget = new QListWidget(centralwidget);
         listWidget->setObjectName(QString::fromUtf8("listWidget"));
-        listWidget->setGeometry(QRect(50, 130, 701, 411));
+        listWidget->setGeometry(QRect(50, 100, 701, 411));
         listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         listWidget->setAutoScroll(true);
         listWidget->setMovement(QListView::Snap);
@@ -60,7 +60,7 @@ public:
         stopButton->setGeometry(QRect(540, 60, 201, 23));
         pushButton = new QPushButton(centralwidget);
         pushButton->setObjectName(QString::fromUtf8("pushButton"));
-        pushButton->setGeometry(QRect(380, 60, 80, 23));
+        pushButton->setGeometry(QRect(340, 60, 161, 23));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));

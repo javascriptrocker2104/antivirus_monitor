@@ -26,6 +26,7 @@ private slots:
     void on_stopButton_clicked();
     void on_pushButton_clicked();
     void Settings();
+    void DeleteLog();
 
 private:
     Ui::MainWindow *ui;

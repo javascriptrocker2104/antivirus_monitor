@@ -20,9 +20,9 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , fileWatcher(new QFileSystemWatcher(this)) // Инициализация fileWatcher
-    , fileMonitor(nullptr) // Инициализация fileMonitor
-    , defaultAction(Heal)
+    , defaultAction(Heal) // Сначала инициализируем defaultAction
+    , fileMonitor(nullptr) // Затем fileMonitor
+    , fileWatcher(new QFileSystemWatcher(this)) // И затем fileWatcher
 {
     ui->setupUi(this);
     this->setWindowTitle("Антивирусный монитор");
@@ -40,17 +40,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Добавление действий
     QAction *settingsAction = fileMenu->addAction("Настройки");
+    QAction *deleteLog = fileMenu->addAction("Очистить окно");
     QAction *exitAction = fileMenu->addAction("Выход");
 
     // Подключение сигналов
-    connect(settingsAction, &QAction::triggered, this, &MainWindow::Settings); // Подключение действия к слоту
+    connect(settingsAction, &QAction::triggered, this, &MainWindow::Settings);
+    connect(deleteLog, &QAction::triggered, this, &MainWindow::DeleteLog); // Исправлено здесь
     connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
 }
 
 MainWindow::~MainWindow() {
     delete ui;
 }
-
 
 void MainWindow::updateLogFile(const QString& filePath) {
     QFile file(filePath);
@@ -95,7 +96,9 @@ void MainWindow::updateLogFile(const QString& filePath) {
     file.close(); // Закрыть файл
 }
 
-
+void MainWindow::DeleteLog() {
+    ui->listWidget->clear(); // Очистить элементы в QListWidget
+}
 
 void MainWindow::on_selectFolderButton_clicked() {
     selectedFolder = QFileDialog::getExistingDirectory(this, "Select Folder", QString());
@@ -156,4 +159,3 @@ void MainWindow::Settings() {
         }
     }
 }
-
