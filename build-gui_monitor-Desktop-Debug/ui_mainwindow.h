@@ -39,6 +39,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
         MainWindow->resize(800, 600);
+        MainWindow->setStyleSheet(QString::fromUtf8(""));
         settingsAction = new QAction(MainWindow);
         settingsAction->setObjectName(QString::fromUtf8("settingsAction"));
         exitAction = new QAction(MainWindow);
@@ -51,13 +52,14 @@ public:
         selectFolderButton->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 170, 0);"));
         listWidget = new QListWidget(centralwidget);
         listWidget->setObjectName(QString::fromUtf8("listWidget"));
-        listWidget->setGeometry(QRect(50, 100, 701, 411));
+        listWidget->setGeometry(QRect(20, 100, 761, 451));
         listWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         listWidget->setAutoScroll(true);
         listWidget->setMovement(QListView::Snap);
         stopButton = new QPushButton(centralwidget);
         stopButton->setObjectName(QString::fromUtf8("stopButton"));
         stopButton->setGeometry(QRect(540, 60, 201, 23));
+        stopButton->setStyleSheet(QString::fromUtf8("background-color: rgb(0, 170, 0);"));
         pushButton = new QPushButton(centralwidget);
         pushButton->setObjectName(QString::fromUtf8("pushButton"));
         pushButton->setGeometry(QRect(340, 60, 161, 23));

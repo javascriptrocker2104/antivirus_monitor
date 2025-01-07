@@ -1,29 +1,7 @@
-вт янв. 7 14:48:23 2025: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
-вт янв. 7 17:18:46 2025: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
-вт янв. 7 17:18:46 2025: Обнаружен новый файл: /home/vladimir/Загрузки/Anne/testirovany/fast
-вт янв. 7 17:18:46 2025: Файл чист: /home/vladimir/Загрузки/Anne/testirovany/fast
-вт янв. 7 17:19:23 2025: Обнаружен новый файл: /home/vladimir/Загрузки/Anne/testirovany/rwq
-вт янв. 7 17:19:23 2025: Файл чист: /home/vladimir/Загрузки/Anne/testirovany/rwq
-вт янв. 7 17:21:35 2025: Внимание: Файл удален: /home/vladimir/Загрузки/Anne/testirovany/fast
-вт янв. 7 17:21:57 2025: Обнаружен новый файл: /home/vladimir/Загрузки/Anne/testirovany/fast
-вт янв. 7 17:21:57 2025: Warning: Файл перемещен в карантин: /home/vladimir/Загрузки/Anne/Карантин/fast/clean_fast
-вт янв. 7 17:21:57 2025: Warning: Папка успешно заархивирована с паролем: /home/vladimir/Загрузки/Anne/Карантин/fast.zip
-вт янв. 7 17:21:58 2025: Внимание: Файл удален: /home/vladimir/Загрузки/Anne/testirovany/fast
-вт янв. 7 17:22:22 2025: Мониторинг был остановлен
-вт янв. 7 17:24:01 2025: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
-вт янв. 7 17:24:16 2025: Мониторинг был остановлен
-вт янв. 7 17:25:52 2025: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
-вт янв. 7 17:26:05 2025: Внимание: Файл изменен: /home/vladimir/Загрузки/Anne/testirovany/getr
-вт янв. 7 17:26:05 2025: Error: Обработан инфицированный файл: /home/vladimir/Загрузки/Anne/testirovany/getr
-вт янв. 7 17:26:37 2025: Внимание: Файл изменен: /home/vladimir/Загрузки/Anne/testirovany/getr
-вт янв. 7 17:26:37 2025: Внимание: Файл удален: getr
-вт янв. 7 17:26:37 2025: Внимание: Файл удален: /home/vladimir/Загрузки/Anne/testirovany/getr
-вт янв. 7 17:27:12 2025: Внимание: Файл изменен: /home/vladimir/Загрузки/Anne/testirovany/rest
-вт янв. 7 17:27:12 2025: Внимание: Зараженный файл игнорирован: /home/vladimir/Загрузки/Anne/testirovany/rest
-вт янв. 7 17:27:36 2025: Внимание: Файл изменен: /home/vladimir/Загрузки/Anne/testirovany/rest
-вт янв. 7 17:27:36 2025: Error: Обработан инфицированный файл: /home/vladimir/Загрузки/Anne/testirovany/rest
-вт янв. 7 17:28:06 2025: Внимание: Файл изменен: /home/vladimir/Загрузки/Anne/testirovany/rwq
-вт янв. 7 17:28:06 2025: Warning: Файл перемещен в карантин: /home/vladimir/Загрузки/Anne/Карантин/rwq/clean_rwq
-вт янв. 7 17:28:06 2025: Warning: Папка успешно заархивирована с паролем: /home/vladimir/Загрузки/Anne/Карантин/rwq.zip
-вт янв. 7 17:28:06 2025: Внимание: Файл удален: /home/vladimir/Загрузки/Anne/testirovany/rwq
-вт янв. 7 17:30:24 2025: Мониторинг был остановлен
+вт янв. 7 20:43:48 2025: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
+вт янв. 7 20:44:03 2025: [Информация] Файл изменен: /home/vladimir/Загрузки/Anne/testirovany/here
+вт янв. 7 20:44:03 2025: [Информация] Файл чист /home/vladimir/Загрузки/Anne/testirovany/here
+вт янв. 7 20:44:17 2025: [Информация] Файл изменен: /home/vladimir/Загрузки/Anne/testirovany/here
+вт янв. 7 20:44:17 2025: [Внимание] Обнаружен зараженный файл:/home/vladimir/Загрузки/Anne/testirovany/here
+вт янв. 7 20:44:17 2025: [Внимание] Зараженный файл был проигнорирован: /home/vladimir/Загрузки/Anne/testirovany/here
+вт янв. 7 20:44:33 2025: Мониторинг был остановлен

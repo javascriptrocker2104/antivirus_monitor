@@ -52,52 +52,75 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() {
     delete ui;
 }
-
 void MainWindow::updateLogFile(const QString& filePath) {
+    qDebug() << "Обновление лог-файла:" << filePath;
+
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "Не удалось открыть файл логов.";
         QMessageBox::warning(this, "Ошибка", "Не удалось открыть файл логов.");
         return;
     }
 
-    ui->listWidget->clear(); // Очистить предыдущие элементы
+    ui->listWidget->clear();
+    qDebug() << "Очистка списка завершена.";
 
+    // Словарь для цветов фона сообщений
     QMap<QString, QBrush> typeBrushes;
-    typeBrushes["Error"] = QBrush(Qt::red);
-    typeBrushes["Warning"] = QBrush(Qt::yellow);
-    typeBrushes["Info"] = QBrush(Qt::blue);
-    QRegExp typeExp("^[а-яА-Я]{2,3} \\w+ \\d{1,2} \\d{2}:\\d{2}:\\d{2} \\d{4}: (\\w+):"); // Регулярное выражение для поиска типа
+    typeBrushes["Ошибка"] = QBrush(Qt::red);
+    typeBrushes["Внимание"] = QBrush(Qt::red);
+    typeBrushes["Информация"] = QBrush(Qt::yellow);
+
     QTextStream in(&file);
 
     while (!in.atEnd()) {
         QString line = in.readLine();
-        if (!line.isEmpty()) {
-            // Применяем регулярное выражение к строке
-            if (typeExp.indexIn(line) != -1) {
-                QString type = typeExp.cap(1); // Получаем тип
-                QBrush brush = typeBrushes.value(type, QBrush(Qt::black)); // Получение соответствующего цвета
+        qDebug() << "Обрабатываем строку:" << line;
 
-                // Отладочный вывод
-                qDebug() << "Found type:" << type << "Color:" << brush.color();
-
-                // Создание и настройка элемента списка
-                QListWidgetItem* item = new QListWidgetItem(line);
-                item->setForeground(brush);
-                ui->listWidget->addItem(item);
-            } else {
-                // Если тип не найден, можно добавить элемент с черным текстом
-                QListWidgetItem* item = new QListWidgetItem(line);
-                item->setForeground(QBrush(Qt::black));
-                ui->listWidget->addItem(item);
+        // Проверяем наличие ключевых слов
+        QString typeFound;
+        for (const QString& type : typeBrushes.keys()) {
+            if (line.contains(type, Qt::CaseInsensitive)) {
+                typeFound = type;
+                break;
             }
         }
+
+        // Если тип найден, окрашиваем фон строки
+        QBrush brush = typeBrushes.value(typeFound, QBrush(Qt::white)); // Белый по умолчанию
+        QListWidgetItem* item = new QListWidgetItem(line);
+        item->setBackground(brush); // Устанавливаем цвет фона
+        ui->listWidget->addItem(item);
+
+        if (!typeFound.isEmpty()) {
+            qDebug() << "Тип сообщения найден:" << typeFound << "Цвет фона:" << brush.color();
+        } else {
+            qDebug() << "Тип сообщения не найден, добавляется элемент с белым фоном.";
+        }
     }
+
     ui->listWidget->scrollToBottom();
-    file.close(); // Закрыть файл
+    qDebug() << "Обновление лог-файла завершено.";
+    file.close();
+    ui->listWidget->update();
 }
 
+
 void MainWindow::DeleteLog() {
-    ui->listWidget->clear(); // Очистить элементы в QListWidget
+    // Очистить элементы в QListWidget
+    ui->listWidget->clear();
+
+    // Путь к файлу логов
+    QString logFilePath = "log.txt";
+
+    // Открываем файл для записи (это очистит файл)
+    QFile logFile(logFilePath);
+    if (logFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        logFile.close(); // Закрываем файл после очистки
+        qDebug() << "Файл логов очищен:" << logFilePath;
+    } else {
+        qDebug() << "Не удалось открыть файл логов для очистки:" << logFilePath;
+    }
 }
 
 void MainWindow::on_selectFolderButton_clicked() {

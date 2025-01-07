@@ -14,8 +14,8 @@ FileMonitor::FileMonitor(const QString& path, QObject *parent)
     loadSignatures("/home/vladimir/Загрузки/Anne/gui_monitor/signatures.cvs");
     loadPreviousFilesList();
     processingQueue = QQueue<QString>();
-    connect(timer, &QTimer::timeout, this, &FileMonitor::scanDirectory); // Исправлено
-    timer->start(1000); // Пересканировать каждую 1 секунду. Настройте по необходимости.
+    connect(timer, &QTimer::timeout, this, &FileMonitor::scanDirectory);
+    timer->start(1000); // Пересканировать каждую 1 секунду.
 }
 
 void FileMonitor::startMonitoring() {
@@ -35,7 +35,7 @@ void FileMonitor::scanDirectory() {
         QString fullPath = dir.absoluteFilePath(file);
         if (!previousFilesList.contains(fullPath)) {
             watcher->addPath(fullPath);
-            qDebug() << "Обнаружен новый файл:" << fullPath;
+            qDebug() << "[Информация] Обнаружен новый файл:" << fullPath;
             log("Обнаружен новый файл: " + fullPath);
             previousFilesList.append(fullPath);
             processingQueue.enqueue(fullPath);
@@ -66,7 +66,7 @@ void FileMonitor::onFileChanged(const QString& path) {
         return; // Если файл не существует, выход
     }
     qDebug() << "Файл изменен. Добавление в очередь обработки:" << path;
-    log("Внимание: Файл изменен: " + path);
+    log("[Информация] Файл изменен: " + path);
     processingQueue.enqueue(path);
     if (processingQueue.size() == 1) {
         processNextFile();
@@ -75,7 +75,7 @@ void FileMonitor::onFileChanged(const QString& path) {
 
 void FileMonitor::onFileRemoved(const QString& path) {
     qDebug() << "Файл удален:" << path;
-    log("Внимание: Файл удален: " + path);
+    log("[Информация] Файл удален: " + path);
     previousFilesList.removeOne(path);
     emit fileDeleted(path);
 }
@@ -96,6 +96,7 @@ void FileMonitor::processNextFile() {
     // Здесь можно добавить вашу логику анализа сигнатур
     if (isInfected(filePath)) {
         qDebug() << "Обнаружен зараженный файл:" << filePath;
+        log("[Внимание] Обнаружен зараженный файл:" + filePath);
         switch (defaultAction) {
             case Heal:
                 handleInfection(filePath);
@@ -107,14 +108,14 @@ void FileMonitor::processNextFile() {
                 }
                 break;
             case Ignore:
-                log("Внимание: Зараженный файл игнорирован: " + filePath);
+                log("[Внимание] Зараженный файл был проигнорирован: " + filePath);
                 break;
             case Quarantine:
                 moveToQuarantine(filePath);
                 break;
         }
     } else {
-        log("Файл чист: " + filePath); // Логирование, если файл чист
+        log("[Информация] Файл чист: " + filePath); // Логирование, если файл чист
     }
 
     // Продолжить обработку следующего файла
@@ -136,9 +137,9 @@ void FileMonitor::moveToQuarantine(const QString& filePath) {
     QString infectedFolder = QDir(quarantineDir).filePath(fileName); // Папка с названием зараженного файла
     QDir().mkpath(infectedFolder); // Создаем папку для зараженного файла
 
-    // Создаем новые файлы для хранения чистого и зараженного содержимого
-    QString cleanFilePath = QDir(infectedFolder).filePath("clean_" + fileName);
-    QString infectedSignaturesFilePath = QDir(infectedFolder).filePath("infected_signatures_" + fileName);
+    // Создаем новые файлы для хранения первых двух строк и остального содержимого
+    QString firstTwoLinesFilePath = QDir(infectedFolder).filePath("first_two_lines_" + fileName);
+    QString remainingContentFilePath = QDir(infectedFolder).filePath("remaining_content_" + fileName);
 
     QFile inputFile(filePath);
     if (!inputFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -146,60 +147,45 @@ void FileMonitor::moveToQuarantine(const QString& filePath) {
         return;
     }
 
-    QFile cleanFile(cleanFilePath);
-    if (!cleanFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "Не удалось создать файл:" << cleanFilePath;
+    QFile firstTwoLinesFile(firstTwoLinesFilePath);
+    if (!firstTwoLinesFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "Не удалось создать файл:" << firstTwoLinesFilePath;
         inputFile.close();
         return;
     }
 
-    QFile infectedSignaturesFile(infectedSignaturesFilePath);
-    if (!infectedSignaturesFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "Не удалось создать файл:" << infectedSignaturesFilePath;
+    QFile remainingContentFile(remainingContentFilePath);
+    if (!remainingContentFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qDebug() << "Не удалось создать файл:" << remainingContentFilePath;
         inputFile.close();
-        cleanFile.close();
+        firstTwoLinesFile.close();
         return;
     }
 
     QTextStream in(&inputFile);
-    QTextStream outClean(&cleanFile);
-    QTextStream outInfected(&infectedSignaturesFile);
+    QTextStream outFirstTwo(&firstTwoLinesFile);
+    QTextStream outRemaining(&remainingContentFile);
 
     QString line;
+    int lineCount = 0;
     while (in.readLineInto(&line)) {
-        bool isInfected = false; // Флаг для отслеживания зараженной строки
-
-        for (const Signature& signature : signatures) {
-            if (signature.isRegex) {
-                QRegularExpression regex(signature.pattern);
-                if (regex.match(line).hasMatch()) {
-                    outInfected << line << "\n"; // Записываем в файл с зараженными сигнатурами
-                    isInfected = true; // Устанавливаем флаг
-                    break; // Прерываем цикл, если нашли заражение
-                }
-            } else {
-                if (line.contains(signature.pattern, Qt::CaseInsensitive)) {
-                    outInfected << line << "\n"; // Записываем в файл с зараженными сигнатурами
-                    isInfected = true; // Устанавливаем флаг
-                    break; // Прерываем цикл, если нашли заражение
-                }
-            }
+        if (lineCount < 2) {
+            outFirstTwo << line << "\n"; // Записываем первые две строки
+        } else {
+            outRemaining << line << "\n"; // Записываем все остальные строки
         }
-
-        if (!isInfected) {
-            outClean << line << "\n"; // Записываем в чистый файл, если строка не заражена
-        }
+        lineCount++;
     }
 
     // Закрываем файлы
     inputFile.close();
-    cleanFile.close();
-    infectedSignaturesFile.close();
+    firstTwoLinesFile.close();
+    remainingContentFile.close();
 
     // Удаляем исходный файл, если он больше не нужен
     QFile::remove(filePath);
-    log("Warning: Файл перемещен в карантин: " + cleanFilePath);
-    qDebug() << "Файл перемещен в карантин:" << cleanFilePath;
+    log("[Информация] Файл перемещен в карантин: " + firstTwoLinesFilePath);
+    qDebug() << "Файл перемещен в карантин:" << firstTwoLinesFilePath;
 
     // Заархивировать папку с файлами
     if (archiveWithPassword(infectedFolder)) {
@@ -209,6 +195,7 @@ void FileMonitor::moveToQuarantine(const QString& filePath) {
         qDebug() << "Папка с зараженным файлом удалена:" << infectedFolder;
     }
 }
+
 
 bool FileMonitor::archiveWithPassword(const QString& folderPath) {
     QString archiveFilePath = folderPath + ".zip"; // Путь к архиву
@@ -221,11 +208,11 @@ bool FileMonitor::archiveWithPassword(const QString& folderPath) {
 
     // Проверяем статус завершения
     if (process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0) {
-        log("Warning: Папка успешно заархивирована с паролем: " + archiveFilePath);
+        //log("Папка успешно заархивирована с паролем: " + archiveFilePath);
         qDebug() << "Папка успешно заархивирована:" << archiveFilePath;
         return true; // Возвращаем true для успешного архивирования
     } else {
-        log("Warning: Ошибка при архивировании папки: " + folderPath);
+        log("Ошибка при архивировании папки: " + folderPath);
         qDebug() << "Ошибка при архивировании:" << process.readAllStandardError();
         return false; // Возвращаем false в случае ошибки
     }
@@ -265,32 +252,38 @@ void FileMonitor::handleInfection(const QString& filePath) {
         }
         file.close();
 
-        QFile outFile("extracted_lines.txt");
-        if (outFile.open(QIODevice::Append | QIODevice::Text)) {
-            QTextStream out(&outFile);
-            if (!lines.isEmpty()) {
-                out << filePath << "\n";
-                out << lines.takeFirst() << "\n"; // Записываем первую строку
+        // Если действие "Вылечить", удаляем строки с сигнатурами
+        if (defaultAction == Heal) {
+            QFile outFile(filePath);
+            if (outFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+                QTextStream out(&outFile);
+                for (const QString& remainingLine : lines) {
+                    bool isInfected = false; // Флаг для отслеживания зараженной строки
+                    for (const Signature& signature : signatures) {
+                        if (signature.isRegex) {
+                            QRegularExpression regex(signature.pattern);
+                            if (regex.match(remainingLine).hasMatch()) {
+                                isInfected = true; // Устанавливаем флаг
+                                break; // Прерываем цикл, если нашли заражение
+                            }
+                        } else {
+                            if (remainingLine.contains(signature.pattern, Qt::CaseInsensitive)) {
+                                isInfected = true; // Устанавливаем флаг
+                                break; // Прерываем цикл, если нашли заражение
+                            }
+                        }
+                    }
+                    if (!isInfected) {
+                        out << remainingLine << "\n"; // Записываем строку, если она не заражена
+                    }
+                }
+                outFile.close();
+                log("[Информация] Файл был вылечен: " + filePath);
+                qDebug() << "Файл был вылечен: " << filePath;
+            } else {
+                log("Ошибка открытия файла " + filePath + " для записи.");
+                qDebug() << "Ошибка открытия файла " << filePath + " для записи";
             }
-            if (!lines.isEmpty()) {
-                out << lines.takeFirst() << "\n"; // Записываем вторую строку
-            }
-            outFile.close();
-        } else {
-            log("Ошибка открытия файла extracted_lines.txt для записи.");
-            qDebug() << "Ошибка открытия файла для записи извлеченных строк";
-        }
-
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QTextStream out(&file);
-            for (const QString& remainingLine : lines) {
-                out << remainingLine << "\n";
-            }
-            log("Error: Обработан инфицированный файл: " + filePath);
-            qDebug() << "Обработан инфицированный файл: " << filePath;
-        } else {
-            log("Ошибка открытия файла " + filePath + " для записи.");
-            qDebug() << "Ошибка открытия файла " << filePath + " для записи";
         }
     } else {
         log("Ошибка открытия файла " + filePath + " для чтения.");
@@ -298,11 +291,20 @@ void FileMonitor::handleInfection(const QString& filePath) {
     }
 }
 
+
 void FileMonitor::loadSignatures(const QString& filename) {
     QFile file(filename);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
         QString line;
+
+        // Пропускаем первую строку (заголовки)
+        if (!in.readLineInto(&line)) {
+            log("Ошибка чтения заголовка из файла сигнатур: " + filename);
+            return; // Выход, если не удалось прочитать заголовок
+        }
+
+        // Чтение остальных строк
         while (in.readLineInto(&line)) {
             if (!line.trimmed().isEmpty()) {
                 QStringList fields = line.split(',', QString::SkipEmptyParts);
