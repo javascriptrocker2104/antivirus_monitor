@@ -16,45 +16,51 @@
 #include <QAction>
 #include "actiondialog.h"
 #include "filemonitor.h"
+#include <QScrollBar>
 
+// Конструктор класса MainWindow
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , defaultAction(Heal) // Сначала инициализируем defaultAction
-    , fileMonitor(nullptr) // Затем fileMonitor
-    , fileWatcher(new QFileSystemWatcher(this)) // И затем fileWatcher
+    , defaultAction(Heal) // Установка действия по умолчанию
+    , fileMonitor(nullptr) // Инициализация указателя на FileMonitor
+    , fileWatcher(new QFileSystemWatcher(this)) // Создание QFileSystemWatcher для отслеживания изменений в файле
 {
-    ui->setupUi(this);
-    this->setWindowTitle("Антивирусный монитор");
+    ui->setupUi(this); // Настройка пользовательского интерфейса
+    this->setWindowTitle("Антивирусный монитор"); // Установка заголовка окна
 
-    // Добавляем файл в QFileSystemWatcher
+    // Очищаем все стили для listWidget
+    ui->listWidget->setStyleSheet("");
+
+    // Добавляем файл в QFileSystemWatcher для отслеживания изменений
     fileWatcher->addPath("log.txt");
     connect(fileWatcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::updateLogFile);
 
-    // Загружаем записи из файла
+    // Загружаем записи из файла логов
     updateLogFile("log.txt");
 
-    // Создание меню
+    // Создание меню в строке меню
     QMenuBar *menuBar = this->menuBar();
     QMenu *fileMenu = menuBar->addMenu("Файл");
 
-    // Добавление действий
+    // Добавление действий в меню
     QAction *settingsAction = fileMenu->addAction("Настройки");
     QAction *deleteLog = fileMenu->addAction("Очистить окно");
     QAction *exitAction = fileMenu->addAction("Выход");
 
-    // Подключение сигналов
+
+    // Подключение сигналов к слотам
     connect(settingsAction, &QAction::triggered, this, &MainWindow::Settings);
-    connect(deleteLog, &QAction::triggered, this, &MainWindow::DeleteLog); // Исправлено здесь
+    connect(deleteLog, &QAction::triggered, this, &MainWindow::DeleteLog);
     connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
 }
 
+// Деструктор класса MainWindow
 MainWindow::~MainWindow() {
     delete ui;
 }
-void MainWindow::updateLogFile(const QString& filePath) {
-    qDebug() << "Обновление лог-файла:" << filePath;
 
+void MainWindow::updateLogFile(const QString& filePath) {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Не удалось открыть файл логов.";
@@ -65,55 +71,45 @@ void MainWindow::updateLogFile(const QString& filePath) {
     ui->listWidget->clear();
     qDebug() << "Очистка списка завершена.";
 
-    // Словарь для цветов фона сообщений
-    QMap<QString, QBrush> typeBrushes;
-    typeBrushes["Ошибка"] = QBrush(Qt::red);
-    typeBrushes["Внимание"] = QBrush(Qt::red);
-    typeBrushes["Информация"] = QBrush(Qt::yellow);
+    // Яркие цвета для разных типов сообщений
+    QMap<QString, QPair<QColor, QColor>> typeColors;
+    typeColors["Ошибка"] = {QColor(255, 255, 255), QColor(255, 0, 0)};
+    typeColors["Внимание"] = {QColor(255, 255, 255), QColor(255, 0, 0)};
+    typeColors["Информация"] = {QColor(255, 255, 255), QColor(0, 150, 0)};
 
     QTextStream in(&file);
 
     while (!in.atEnd()) {
         QString line = in.readLine();
-        qDebug() << "Обрабатываем строку:" << line;
+        QListWidgetItem* item = new QListWidgetItem(line);
 
-        // Проверяем наличие ключевых слов
-        QString typeFound;
-        for (const QString& type : typeBrushes.keys()) {
+        // Устанавливаем стандартный цвет
+        item->setBackground(Qt::white);
+        item->setForeground(Qt::black);
+
+        // Проверяем на наличие ключевых слов
+        for (const QString& type : typeColors.keys()) {
             if (line.contains(type, Qt::CaseInsensitive)) {
-                typeFound = type;
+                item->setBackground(typeColors[type].first);
+                item->setForeground(typeColors[type].second);
                 break;
             }
         }
 
-        // Если тип найден, окрашиваем фон строки
-        QBrush brush = typeBrushes.value(typeFound, QBrush(Qt::white)); // Белый по умолчанию
-        QListWidgetItem* item = new QListWidgetItem(line);
-        item->setBackground(brush); // Устанавливаем цвет фона
         ui->listWidget->addItem(item);
-
-        if (!typeFound.isEmpty()) {
-            qDebug() << "Тип сообщения найден:" << typeFound << "Цвет фона:" << brush.color();
-        } else {
-            qDebug() << "Тип сообщения не найден, добавляется элемент с белым фоном.";
-        }
     }
 
     ui->listWidget->scrollToBottom();
-    qDebug() << "Обновление лог-файла завершено.";
     file.close();
-    ui->listWidget->update();
 }
 
 
+// Метод для очистки логов
 void MainWindow::DeleteLog() {
-    // Очистить элементы в QListWidget
-    ui->listWidget->clear();
+    ui->listWidget->clear(); // Очистка элементов в QListWidget
+    QString logFilePath = "log.txt"; // Путь к файлу логов
 
-    // Путь к файлу логов
-    QString logFilePath = "log.txt";
-
-    // Открываем файл для записи (это очистит файл)
+    // Открываем файл для записи и очистки
     QFile logFile(logFilePath);
     if (logFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         logFile.close(); // Закрываем файл после очистки
@@ -123,6 +119,7 @@ void MainWindow::DeleteLog() {
     }
 }
 
+// Метод для выбора папки
 void MainWindow::on_selectFolderButton_clicked() {
     selectedFolder = QFileDialog::getExistingDirectory(this, "Select Folder", QString());
 
@@ -130,23 +127,17 @@ void MainWindow::on_selectFolderButton_clicked() {
         if (fileMonitor) {
             delete fileMonitor; // Удаляем предыдущий монитор, если он существует
         }
-        fileMonitor = new FileMonitor(selectedFolder, this);
-        connect(fileMonitor, &FileMonitor::fileChanged, this, &MainWindow::on_fileChanged);
-        fileMonitor->startMonitoring();
+        fileMonitor = new FileMonitor(selectedFolder, this); // Создание нового экземпляра FileMonitor
+        fileMonitor->startMonitoring(); // Запуск мониторинга
         QMessageBox::information(this, "Начался мониторинг", "Мониторинг начался для папки: " + selectedFolder);
     }
 }
 
-void MainWindow::on_fileChanged(const QString& filePath) {
-    Q_UNUSED(filePath);
-    // Здесь можно обновить интерфейс или отобразить список зараженных файлов
-    // Удалено: showActionDialog();
-}
-
+// Метод для остановки мониторинга
 void MainWindow::on_stopButton_clicked() {
     if (fileMonitor) {
-        fileMonitor->stopMonitoring(); // Предполагается, что у вас есть метод stopMonitoring в классе FileMonitor
-        delete fileMonitor; // Удаляем объект, если он больше не нужен
+        fileMonitor->stopMonitoring(); // Остановка мониторинга
+        delete fileMonitor; // Удаляем объект
         fileMonitor = nullptr; // Устанавливаем указатель в nullptr
         QMessageBox::information(this, "Мониторинг остановлен", "Мониторинг файловой системы был успешно остановлен.");
     } else {
@@ -154,21 +145,23 @@ void MainWindow::on_stopButton_clicked() {
     }
 }
 
+// Метод для открытия папки карантина
 void MainWindow::on_pushButton_clicked() {
-    QString quarantineFolderPath = "/home/vladimir/Загрузки/Anne/Карантин"; // Укажите путь к папке карантин
-    QDesktopServices::openUrl(QUrl::fromLocalFile(quarantineFolderPath));
+    QString quarantineFolderPath = "/home/vladimir/Загрузки/Anne/Карантин"; // Путь к папке карантин
+    QDesktopServices::openUrl(QUrl::fromLocalFile(quarantineFolderPath)); // Открытие папки в файловом менеджере
 }
 
+// Метод для открытия диалога настроек
 void MainWindow::Settings() {
-    ActionDialog dialog(this); // Создаем экземпляр ActionDialog
-    if (dialog.exec() == QDialog::Accepted) {
-        QString selectedAction = dialog.selectedAction();
+    ActionDialog dialog(this); // Создание экземпляра ActionDialog
+    if (dialog.exec() == QDialog::Accepted) { // Проверка, было ли подтверждено действие
+        QString selectedAction = dialog.selectedAction(); // Получение выбранного действия
         QMessageBox::information(this, "Выбор действия", "Вы выбрали: " + selectedAction);
 
-        // Обновите defaultAction в зависимости от выбора пользователя
-        if (selectedAction == "Удалить файл") {
+        // Обновление defaultAction в зависимости от выбора пользователя
+        if (selectedAction == "Удалить") {
             defaultAction = Delete;
-        } else if (selectedAction == "Карантин") {
+        } else if (selectedAction == "Переместить в карантин") {
             defaultAction = Quarantine;
         } else if (selectedAction == "Игнорировать") {
             defaultAction = Ignore;
@@ -176,7 +169,7 @@ void MainWindow::Settings() {
             defaultAction = Heal;
         }
 
-        // Устанавливаем действие в FileMonitor
+        // Установка действия в FileMonitor
         if (fileMonitor) {
             fileMonitor->setDefaultAction(defaultAction);
         }

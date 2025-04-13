@@ -5,54 +5,52 @@
 
 ActionDialog::ActionDialog(QWidget *parent) :
     QDialog(parent),
-    deleteRadioButton(new QRadioButton("Удалить файл", this)),
-    quarantineRadioButton(new QRadioButton("Карантин", this)),
+    deleteRadioButton(new QRadioButton("Удалить", this)),
+    quarantineRadioButton(new QRadioButton("Переместить в карантин", this)),
     ignoreRadioButton(new QRadioButton("Игнорировать", this)),
     healRadioButton(new QRadioButton("Вылечить", this)),
-    selected("") // Инициализируем выбранное действие пустой строкой
+    selected("") // Инициализация выбранного действия
 {
-    // Установим заголовок окна
-    setWindowTitle("Выберите действие");
+    setWindowTitle("Настройки"); // Заголовок окна
 
-    // Создаем вертикальный layout
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    QVBoxLayout *layout = new QVBoxLayout(this); // Вертикальная раскладка
 
-    // Добавляем радиокнопки в layout
-    layout->addWidget(new QLabel("Выберите действие:", this));
+    // Добавление радиокнопок и метки в layout
+    layout->addWidget(new QLabel("Что необходимо сделать с зараженным файлом?", this));
     layout->addWidget(deleteRadioButton);
     layout->addWidget(quarantineRadioButton);
     layout->addWidget(ignoreRadioButton);
     layout->addWidget(healRadioButton);
 
-    // Создаем кнопки "ОК" и "Отмена"
+    // Создание кнопок "ОК" и "Отмена"
     QDialogButtonBox *buttonBox = new QDialogButtonBox(this);
     QPushButton *confirmButton = buttonBox->addButton(QDialogButtonBox::Ok);
     QPushButton *cancelButton = buttonBox->addButton(QDialogButtonBox::Cancel);
 
-    layout->addWidget(buttonBox);
+    layout->addWidget(buttonBox); // Добавление кнопок в layout
 
-    // Подключаем сигналы к слотам
+    // Подключение сигналов к слотам
     connect(confirmButton, &QPushButton::clicked, this, &ActionDialog::onConfirm);
-    connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject); // Закрываем диалог при нажатии "Отмена"
+    connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject); // Закрытие диалога при нажатии "Отмена"
 
-    setLayout(layout);
+    setLayout(layout); // Установка layout
 }
 
 QString ActionDialog::selectedAction() const {
-    return selected; // Возвращаем выбранное действие
+    return selected; // Возвращение выбранного действия
 }
 
 void ActionDialog::onConfirm() {
-    // Определяем, какая радиокнопка выбрана
+    // Определение выбранной радиокнопки
     if (deleteRadioButton->isChecked()) {
-        selected = "Удалить файл";
+        selected = "Удалить";
     } else if (quarantineRadioButton->isChecked()) {
-        selected = "Карантин";
+        selected = "Переместить в карантин";
     } else if (ignoreRadioButton->isChecked()) {
         selected = "Игнорировать";
     } else if (healRadioButton->isChecked()) {
         selected = "Вылечить";
     }
 
-    accept(); // Закрываем диалог с результатом "Принято"
+    accept(); // Закрытие диалога с результатом "Принято"
 }

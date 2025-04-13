@@ -21,18 +21,15 @@ SOURCES += \
     filemonitor.cpp \
     main.cpp \
     mainwindow.cpp \
-    quarantine.cpp
 
 HEADERS += \
     actiondialog.h \
     filemonitor.h \
     mainwindow.h \
-    quarantine.h
 
 FORMS += \
     ActionDialog.ui \
     mainwindow.ui \
-    quarantine.ui
 
 TRANSLATIONS += \
     gui_monitor_ru_RU.ts
@@ -46,5 +43,4 @@ DISTFILES += \
     extracted_lines.txt \
     log.txt \
     signatures.cvs \
-    signatures.txt \
     previous_files.txt

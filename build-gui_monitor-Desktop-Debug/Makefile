@@ -55,24 +55,19 @@ OBJECTS_DIR   = ./
 SOURCES       = ../gui_monitor/actiondialog.cpp \
 		../gui_monitor/filemonitor.cpp \
 		../gui_monitor/main.cpp \
-		../gui_monitor/mainwindow.cpp \
-		../gui_monitor/quarantine.cpp moc_actiondialog.cpp \
+		../gui_monitor/mainwindow.cpp moc_actiondialog.cpp \
 		moc_filemonitor.cpp \
-		moc_mainwindow.cpp \
-		moc_quarantine.cpp
+		moc_mainwindow.cpp
 OBJECTS       = actiondialog.o \
 		filemonitor.o \
 		main.o \
 		mainwindow.o \
-		quarantine.o \
 		moc_actiondialog.o \
 		moc_filemonitor.o \
-		moc_mainwindow.o \
-		moc_quarantine.o
+		moc_mainwindow.o
 DIST          = ../gui_monitor/extracted_lines.txt \
 		../gui_monitor/log.txt \
 		../gui_monitor/signatures.cvs \
-		../gui_monitor/signatures.txt \
 		../gui_monitor/previous_files.txt \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
@@ -152,12 +147,10 @@ DIST          = ../gui_monitor/extracted_lines.txt \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		../gui_monitor/gui_monitor.pro ../gui_monitor/actiondialog.h \
 		../gui_monitor/filemonitor.h \
-		../gui_monitor/mainwindow.h \
-		../gui_monitor/quarantine.h ../gui_monitor/actiondialog.cpp \
+		../gui_monitor/mainwindow.h ../gui_monitor/actiondialog.cpp \
 		../gui_monitor/filemonitor.cpp \
 		../gui_monitor/main.cpp \
-		../gui_monitor/mainwindow.cpp \
-		../gui_monitor/quarantine.cpp
+		../gui_monitor/mainwindow.cpp
 QMAKE_TARGET  = AntivirusMonitor
 DESTDIR       = 
 TARGET        = AntivirusMonitor
@@ -166,7 +159,7 @@ TARGET        = AntivirusMonitor
 first: all
 ####### Build rules
 
-AntivirusMonitor: ui_ActionDialog.h ui_mainwindow.h ui_quarantine.h $(OBJECTS)  
+AntivirusMonitor: ui_ActionDialog.h ui_mainwindow.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: ../gui_monitor/gui_monitor.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
@@ -339,9 +332,9 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../gui_monitor/actiondialog.h ../gui_monitor/filemonitor.h ../gui_monitor/mainwindow.h ../gui_monitor/quarantine.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../gui_monitor/actiondialog.cpp ../gui_monitor/filemonitor.cpp ../gui_monitor/main.cpp ../gui_monitor/mainwindow.cpp ../gui_monitor/quarantine.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../gui_monitor/ActionDialog.ui ../gui_monitor/mainwindow.ui ../gui_monitor/quarantine.ui $(DISTDIR)/
+	$(COPY_FILE) --parents ../gui_monitor/actiondialog.h ../gui_monitor/filemonitor.h ../gui_monitor/mainwindow.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../gui_monitor/actiondialog.cpp ../gui_monitor/filemonitor.cpp ../gui_monitor/main.cpp ../gui_monitor/mainwindow.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../gui_monitor/ActionDialog.ui ../gui_monitor/mainwindow.ui $(DISTDIR)/
 	$(COPY_FILE) --parents gui_monitor_ru_RU.ts $(DISTDIR)/
 
 
@@ -374,9 +367,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++11 -Wall -W -dM -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_actiondialog.cpp moc_filemonitor.cpp moc_mainwindow.cpp moc_quarantine.cpp
+compiler_moc_header_make_all: moc_actiondialog.cpp moc_filemonitor.cpp moc_mainwindow.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_actiondialog.cpp moc_filemonitor.cpp moc_mainwindow.cpp moc_quarantine.cpp
+	-$(DEL_FILE) moc_actiondialog.cpp moc_filemonitor.cpp moc_mainwindow.cpp
 moc_actiondialog.cpp: ../gui_monitor/actiondialog.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
@@ -393,18 +386,13 @@ moc_mainwindow.cpp: ../gui_monitor/mainwindow.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/vladimir/Загрузки/Anne/build-gui_monitor-Desktop-Debug/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/vladimir/Загрузки/Anne/gui_monitor -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../gui_monitor/mainwindow.h -o moc_mainwindow.cpp
 
-moc_quarantine.cpp: ../gui_monitor/quarantine.h \
-		moc_predefs.h \
-		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/vladimir/Загрузки/Anne/build-gui_monitor-Desktop-Debug/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/vladimir/Загрузки/Anne/gui_monitor -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../gui_monitor/quarantine.h -o moc_quarantine.cpp
-
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_ActionDialog.h ui_mainwindow.h ui_quarantine.h
+compiler_uic_make_all: ui_ActionDialog.h ui_mainwindow.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_ActionDialog.h ui_mainwindow.h ui_quarantine.h
+	-$(DEL_FILE) ui_ActionDialog.h ui_mainwindow.h
 ui_ActionDialog.h: ../gui_monitor/ActionDialog.ui \
 		/usr/lib/qt5/bin/uic
 	/usr/lib/qt5/bin/uic ../gui_monitor/ActionDialog.ui -o ui_ActionDialog.h
@@ -412,10 +400,6 @@ ui_ActionDialog.h: ../gui_monitor/ActionDialog.ui \
 ui_mainwindow.h: ../gui_monitor/mainwindow.ui \
 		/usr/lib/qt5/bin/uic
 	/usr/lib/qt5/bin/uic ../gui_monitor/mainwindow.ui -o ui_mainwindow.h
-
-ui_quarantine.h: ../gui_monitor/quarantine.ui \
-		/usr/lib/qt5/bin/uic
-	/usr/lib/qt5/bin/uic ../gui_monitor/quarantine.ui -o ui_quarantine.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -430,9 +414,7 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 actiondialog.o: ../gui_monitor/actiondialog.cpp ../gui_monitor/actiondialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o actiondialog.o ../gui_monitor/actiondialog.cpp
 
-filemonitor.o: ../gui_monitor/filemonitor.cpp ../gui_monitor/filemonitor.h \
-		../gui_monitor/actiondialog.h \
-		../gui_monitor/mainwindow.h
+filemonitor.o: ../gui_monitor/filemonitor.cpp ../gui_monitor/filemonitor.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o filemonitor.o ../gui_monitor/filemonitor.cpp
 
 main.o: ../gui_monitor/main.cpp ../gui_monitor/mainwindow.h \
@@ -446,10 +428,6 @@ mainwindow.o: ../gui_monitor/mainwindow.cpp ../gui_monitor/mainwindow.h \
 		../gui_monitor/actiondialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../gui_monitor/mainwindow.cpp
 
-quarantine.o: ../gui_monitor/quarantine.cpp ../gui_monitor/quarantine.h \
-		ui_quarantine.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o quarantine.o ../gui_monitor/quarantine.cpp
-
 moc_actiondialog.o: moc_actiondialog.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_actiondialog.o moc_actiondialog.cpp
 
@@ -458,9 +436,6 @@ moc_filemonitor.o: moc_filemonitor.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp
-
-moc_quarantine.o: moc_quarantine.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_quarantine.o moc_quarantine.cpp
 
 ####### Install
 

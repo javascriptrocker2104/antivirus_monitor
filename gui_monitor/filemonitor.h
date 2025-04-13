@@ -17,17 +17,16 @@
 #include <QTimer>
 #include <QQueue>
 
-
-// Определение структуры Signature
+// Структура для хранения сигнатуры вируса
 struct Signature {
-    QString id;
-    QString type;
-    QString description;
-    QString pattern;
-    bool isRegex;
+    QString id;          // Идентификатор сигнатуры
+    QString type;        // Тип вируса
+    QString description; // Описание вируса
+    QString pattern;     // Шаблон для проверки
+    bool isRegex;       // Используется ли регулярное выражение
 };
 
-// Объявление перечисления Action
+// Перечисление возможных действий при обнаружении вируса
 enum Action {
     Heal,
     Delete,
@@ -39,44 +38,40 @@ class FileMonitor : public QObject {
     Q_OBJECT
 
 public:
-    explicit FileMonitor(const QString& path, QObject *parent = nullptr);
-    void startMonitoring();
-    void stopMonitoring();
-    void setDefaultAction(Action action);
+    explicit FileMonitor(const QString& path, QObject *parent = nullptr);//Конструктор
+    void startMonitoring();   // Начать мониторинг
+    void stopMonitoring();    // Остановить мониторинг
+    void setDefaultAction(Action action); // Установить действие по умолчанию
 
 signals:
-    void fileChanged(const QString &path);
-    void directoryChanged(const QString &path);
-    void fileDeleted(const QString& path);
+    void fileChanged(const QString &path); // Сигнал о изменении файла
+    void fileDeleted(const QString& path);  // Сигнал о удалении файла
 
 private slots:
-    void onFileChanged(const QString& path);
-    void onDirectoryChanged(const QString& path);
+    void onFileChanged(const QString& path); // Обработчик изменения файла
 
 private:
-    void scanDirectory();
-    bool isInfected(const QString& filePath);
-    void handleInfection(const QString& filePath);
-    void promptUser  (const QString& filePath);
-    void moveToQuarantine(const QString& filePath);
-    bool archiveWithPassword(const QString& filePath);
-    void loadSignatures(const QString& filename);
-    void log(const QString& message);
-    void savePreviousFilesList(); // Декларация метода для сохранения списка файлов
-    void loadPreviousFilesList(); // Декларация метода для загрузки списка файлов
-    void processNextFile();
-    void onFileRemoved(const QString& path);
+    void scanDirectory();                  // Сканировать директорию
+    bool isInfected(const QString& filePath); // Проверить файл на зараженность
+    void handleInfection(const QString& filePath); // Обработать зараженный файл
+    void moveToQuarantine(const QString& filePath); // Переместить файл в карантин
+    bool archiveWithPassword(const QString& filePath); // Архивировать файл с паролем
+    void loadSignatures(const QString& filename); // Загрузить сигнатуры из файла
+    void log(const QString& message);      // Логирование сообщений
+    void savePreviousFilesList();          // Сохранить список ранее обработанных файлов
+    void loadPreviousFilesList();          // Загрузить список ранее обработанных файлов
+    void processNextFile();                 // Обработать следующий файл из очереди
+    void onFileRemoved(const QString& path); // Обработчик удаления файла
 
-    QString directoryPath;
-    QFileSystemWatcher *watcher;
-    QVector<Signature> signatures;
-    QStringList previousFilesList;
-    QStringList infectedFiles;
-    QStringList getInfectedFiles() const;
-    QFile* currentFile;
-    QTimer* timer;
-    Action defaultAction;
-    QQueue<QString> processingQueue;
+    QString directoryPath;                  // Путь к директории
+    QFileSystemWatcher *watcher;           // Наблюдатель за файловой системой
+    QVector<Signature> signatures;          // Сигнатуры вирусов
+    QStringList previousFilesList;         // Список ранее обработанных файлов
+    QStringList infectedFiles;             // Список зараженных файлов
+    QFile* currentFile;                     // Текущий обрабатываемый файл
+    QTimer* timer;                          // Таймер для периодических задач
+    Action defaultAction;                   // Действие по умолчанию при заражении
+    QQueue<QString> processingQueue;        // Очередь файлов для обработки
 };
 
 #endif // FILEMONITOR_H

@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "filemonitor.h" // Убедитесь, что filemonitor.h объявляет Action
+#include "filemonitor.h"
 #include <QMainWindow>
 #include <QFileSystemWatcher>
 #include <QListWidgetItem>
@@ -13,28 +13,36 @@ namespace Ui {
 class MainWindow;
 }
 
+// Основной класс пользовательского интерфейса антивирусного приложения
 class MainWindow : public QMainWindow {
-    Q_OBJECT
+    Q_OBJECT // Макрос для поддержки сигналов и слотов в Qt
 
 public:
+    // Конструктор класса
     explicit MainWindow(QWidget *parent = nullptr);
+    // Деструктор класса
     ~MainWindow();
 
 private slots:
+    // Слот, вызываемый при нажатии на кнопку выбора папки
     void on_selectFolderButton_clicked();
-    void on_fileChanged(const QString& filePath);
+    // Слот, вызываемый при нажатии на кнопку остановки мониторинга
     void on_stopButton_clicked();
+    // Слот, вызываемый при нажатии на кнопку открытия папки карантина
     void on_pushButton_clicked();
+    // Слот для открытия окна настроек
     void Settings();
+    // Слот для очистки лог-файла
     void DeleteLog();
 
 private:
     Ui::MainWindow *ui;
-    Action defaultAction; // Объявление defaultAction как члена класса
-    FileMonitor *fileMonitor; // Объявление fileMonitor
-    QFileSystemWatcher *fileWatcher; // Объявление fileWatcher
-    QString selectedFolder; // Объявление selectedFolder
-    void updateLogFile(const QString& filePath); // Объявление updateLogFile
+    Action defaultAction;
+    FileMonitor *fileMonitor;
+    QFileSystemWatcher *fileWatcher;
+    QString selectedFolder;
+    // Метод для обновления лог-файла
+    void updateLogFile(const QString& filePath);
 };
 
 #endif // MAINWINDOW_H

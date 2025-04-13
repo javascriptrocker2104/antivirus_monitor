@@ -1,1 +1,3 @@
-/home/vladimir/Загрузки/Anne/testirovany/here
+/home/vladimir/Загрузки/Anne/testirovany/lin.cpp
+/home/vladimir/Загрузки/Anne/testirovany/sign.cpp
+/home/vladimir/Загрузки/Anne/testirovany/sign.exe

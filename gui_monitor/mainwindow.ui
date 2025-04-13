@@ -6,79 +6,226 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>900</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Antivirus Monitor</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">
+   /* Main window style */
+   QMainWindow {
+       background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                 stop:0 #1a2a6c, stop:1 #b21f1f);
+   }
+
+   /* Menu bar style */
+   QMenuBar {
+       background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                 stop:0 #34495e, stop:1 #2c3e50);
+       color: white;
+       font-weight: bold;
+   }
+
+   QMenuBar::item {
+       background: transparent;
+       padding: 5px 10px;
+   }
+
+   QMenuBar::item:selected {
+       background: #2980b9; /* Цвет фона при наведении */
+   }
+
+   QMenuBar::item:pressed {
+       background: #3498db; /* Цвет фона при нажатии */
+   }
+
+   /* Central widget */
+   QWidget#centralwidget {
+       background: rgba(255, 255, 255, 0.9);
+       border-radius: 15px;
+       border: 2px solid #2c3e50;
+   }
+
+
+   /* Buttons style */
+   QPushButton {
+       background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                 stop:0 #3498db, stop:1 #2980b9);
+       border: 1px solid #2980b9;
+       color: white;
+       font-weight: bold;
+       border-radius: 5px;
+       padding: 5px;
+       min-width: 100px;
+   }
+
+   QPushButton:hover {
+       background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                 stop:0 #2980b9, stop:1 #3498db);
+   }
+
+   QPushButton:pressed {
+       background: #2c3e50;
+   }
+
+   /* Special buttons */
+   QPushButton#stopButton {
+       background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                 stop:0 #e74c3c, stop:1 #c0392b);
+       border: 1px solid #c0392b;
+   }
+
+   QPushButton#stopButton:hover {
+       background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                 stop:0 #c0392b, stop:1 #e74c3c);
+   }
+
+   QPushButton#pushButton {
+       background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                 stop:0 #f39c12, stop:1 #e67e22);
+       border: 1px solid #e67e22;
+   }
+
+   QPushButton#pushButton:hover {
+       background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                 stop:0 #e67e22, stop:1 #f39c12);
+   }
+
+/* List widget */
+QListWidget {
+    background: white;
+    border: 2px solid #bdc3c7;
+    border-radius: 10px;
+    font-family: 'Consolas';
+    font-size: 11px;
+}
+
+QListWidget::item {
+    padding: 5px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+QListWidget::item:selected {
+    background: #3498db;
+    color: white;
+}
+
+   /* Header label */
+   QLabel#headerLabel {
+       font-size: 16px;
+       font-weight: bold;
+       color: #2c3e50;
+       background: transparent;
+       border: none;
+   }
+
+   /* Scroll bars */
+   QScrollBar:vertical {
+       border: none;
+       background: #ecf0f1;
+       width: 10px;
+       margin: 0px 0px 0px 0px;
+   }
+
+   QScrollBar::handle:vertical {
+       background: #bdc3c7;
+       min-height: 20px;
+       border-radius: 5px;
+   }
+
+   QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+       height: 0px;
+   }
+   </string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>860</width>
+     <height>610</height>
+    </rect>
+   </property>
+   <widget class="QLabel" name="headerLabel">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>300</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>🔍 Антивирусный монитор</string>
+    </property>
+   </widget>
    <widget class="QPushButton" name="selectFolderButton">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>20</x>
       <y>60</y>
-      <width>251</width>
-      <height>23</height>
+      <width>300</width>
+      <height>30</height>
      </rect>
     </property>
-    <property name="styleSheet">
-     <string notr="true">background-color: rgb(0, 170, 0);</string>
+    <property name="text">
+     <string>📁 Выбрать папку для мониторинга</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>60</y>
+      <width>180</width>
+      <height>30</height>
+     </rect>
     </property>
     <property name="text">
-     <string>Выбрать папку для мониторинга</string>
+     <string>🚨 Карантин</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stopButton">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>60</y>
+      <width>200</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>⏹ Остановить мониторинг</string>
     </property>
    </widget>
    <widget class="QListWidget" name="listWidget">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>100</y>
-      <width>761</width>
-      <height>451</height>
+      <y>110</y>
+      <width>820</width>
+      <height>470</height>
      </rect>
     </property>
-    <property name="verticalScrollBarPolicy">
-     <enum>Qt::ScrollBarAsNeeded</enum>
-    </property>
-    <property name="autoScroll">
-     <bool>true</bool>
-    </property>
-    <property name="movement">
-     <enum>QListView::Snap</enum>
-    </property>
    </widget>
-   <widget class="QPushButton" name="stopButton">
+   <widget class="QLabel" name="statusLabel">
     <property name="geometry">
      <rect>
-      <x>540</x>
-      <y>60</y>
-      <width>201</width>
-      <height>23</height>
+      <x>20</x>
+      <y>590</y>
+      <width>821</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(0, 170, 0);</string>
+     <string notr="true">color: #7f8c8d; font-style: italic;</string>
     </property>
     <property name="text">
-     <string>Остановить мониторинг</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>340</x>
-      <y>60</y>
-      <width>161</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Карантин</string>
+     <string>Статус: Готов к работе</string>
     </property>
    </widget>
   </widget>
@@ -87,15 +234,22 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>20</height>
+     <width>900</width>
+     <height>25</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="settingsAction"/>
+    <addaction name="exitAction"/>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="settingsAction">
    <property name="text">
-    <string>Настройки монитора</string>
+    <string>⚙️ Настройки</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -103,7 +257,7 @@
   </action>
   <action name="exitAction">
    <property name="text">
-    <string>Выход</string>
+    <string>🚪 Выход</string>
    </property>
   </action>
  </widget>
