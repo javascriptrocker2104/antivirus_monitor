@@ -1,4 +1,1 @@
-/home/vladimir/Загрузки/Anne/testirovany/sign.cpp
-/home/vladimir/Загрузки/Anne/testirovany/sign.exe
-/home/vladimir/Загрузки/Anne/testirovany/test
-/home/vladimir/Загрузки/Anne/testirovany/testvi.exe
+/home/vladimir/Загрузки/Anne/documents/update_system.sh

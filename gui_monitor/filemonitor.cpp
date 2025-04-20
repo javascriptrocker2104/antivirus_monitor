@@ -272,11 +272,9 @@ void FileMonitor::handleInfection(const QString& filePath) {
     switch(defaultAction) {
         case Quarantine:
             moveToQuarantine(filePath);
-            log("[Информация] Файл перемещен в карантин: " + filePath);
             break;
         case Delete:
             QFile::remove(filePath);
-            log("[Информация] Файл удален: " + filePath);
             break;
         case Heal:
             healFile(filePath); // Вынесем лечение в отдельный метод
