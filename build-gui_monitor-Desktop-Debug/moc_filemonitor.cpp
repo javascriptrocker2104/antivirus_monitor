@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_FileMonitor_t {
-    QByteArrayData data[6];
-    char stringdata0[56];
+    QByteArrayData data[11];
+    char stringdata0[93];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -36,11 +36,17 @@ QT_MOC_LITERAL(1, 12, 11), // "fileChanged"
 QT_MOC_LITERAL(2, 24, 0), // ""
 QT_MOC_LITERAL(3, 25, 4), // "path"
 QT_MOC_LITERAL(4, 30, 11), // "fileDeleted"
-QT_MOC_LITERAL(5, 42, 13) // "onFileChanged"
+QT_MOC_LITERAL(5, 42, 13), // "onFileChanged"
+QT_MOC_LITERAL(6, 56, 6), // "Action"
+QT_MOC_LITERAL(7, 63, 4), // "Heal"
+QT_MOC_LITERAL(8, 68, 6), // "Delete"
+QT_MOC_LITERAL(9, 75, 6), // "Ignore"
+QT_MOC_LITERAL(10, 82, 10) // "Quarantine"
 
     },
     "FileMonitor\0fileChanged\0\0path\0fileDeleted\0"
-    "onFileChanged"
+    "onFileChanged\0Action\0Heal\0Delete\0"
+    "Ignore\0Quarantine"
 };
 #undef QT_MOC_LITERAL
 
@@ -52,7 +58,7 @@ static const uint qt_meta_data_FileMonitor[] = {
        0,    0, // classinfo
        3,   14, // methods
        0,    0, // properties
-       0,    0, // enums/sets
+       1,   38, // enums/sets
        0,    0, // constructors
        0,       // flags
        2,       // signalCount
@@ -70,6 +76,15 @@ static const uint qt_meta_data_FileMonitor[] = {
 
  // slots: parameters
     QMetaType::Void, QMetaType::QString,    3,
+
+ // enums: name, alias, flags, count, data
+       6,    6, 0x0,    4,   43,
+
+ // enum data: key, value
+       7, uint(FileMonitor::Heal),
+       8, uint(FileMonitor::Delete),
+       9, uint(FileMonitor::Ignore),
+      10, uint(FileMonitor::Quarantine),
 
        0        // eod
 };

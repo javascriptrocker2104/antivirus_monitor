@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 3.5)
+project(AVMonitor)
+
+# Настройки C++
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Поиск Qt6 компонентов
+find_package(Qt6 REQUIRED COMPONENTS Core Network Concurrent Gui Widgets)
+
+# Поиск OpenSSL (для шифрования)
+find_package(OpenSSL REQUIRED)
+set(OPENSSL_ROOT_DIR "/usr/include/openssl")  # Явное указание пути для Linux
+
+# Добавление исполняемого файла
+add_executable(avmonitor
+    main.cpp
+    filemonitor.cpp
+    filemonitor.h
+)
+
+# Подключение библиотек
+target_link_libraries(avmonitor
+    Qt6::Core
+    Qt6::Network
+    Qt6::Concurrent
+    Qt6::Gui
+    Qt6::Widgets
+    OpenSSL::SSL
+    OpenSSL::Crypto
+)
+
+# Установка файлов
+install(TARGETS avmonitor DESTINATION /usr/local/bin)
+install(FILES signatures.cvs DESTINATION /etc/av)
+install(FILES log.txt DESTINATION /var/log/avmonitor)

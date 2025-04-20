@@ -1,2 +1,12 @@
-вс апр. 13 13:58:15 2025: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
-вс апр. 13 13:58:17 2025: Мониторинг был остановлен
+вс апр. 20 14:14:12 2025: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
+вс апр. 20 14:14:15 2025: [Информация] Обнаружен новый файл: /home/vladimir/Загрузки/Anne/testirovany/testvirus.exe
+вс апр. 20 14:14:15 2025: [Внимание] Обнаружен зараженный файл:/home/vladimir/Загрузки/Anne/testirovany/testvirus.exe
+вс апр. 20 14:14:15 2025: [Информация] Файл вылечен: /home/vladimir/Загрузки/Anne/testirovany/testvirus.exe
+вс апр. 20 14:14:15 2025: [Информация] Файл чист: /home/vladimir/Загрузки/Anne/testirovany/testvirus.exe
+вс апр. 20 14:14:20 2025: Мониторинг был остановлен
+вс апр. 20 14:14:29 2025: Мониторинг папки начат: /home/vladimir/Загрузки/Anne/testirovany
+вс апр. 20 14:14:53 2025: [Внимание] Обнаружен зараженный файл:/home/vladimir/Загрузки/Anne/testirovany/testvirus.exe
+вс апр. 20 14:14:53 2025: [Информация] Файл перемещен в карантин: /home/vladimir/Загрузки/Anne/Карантин/testvirus.exe/first_two_lines_testvirus.exe
+вс апр. 20 14:14:53 2025: [Информация] Файл перемещен в карантин: /home/vladimir/Загрузки/Anne/testirovany/testvirus.exe
+вс апр. 20 14:14:53 2025: [Информация] Файл удален: /home/vladimir/Загрузки/Anne/testirovany/testvirus.exe
+вс апр. 20 14:15:01 2025: Мониторинг был остановлен

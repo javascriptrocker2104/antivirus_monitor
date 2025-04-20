@@ -4,120 +4,120 @@
 #include <QStringList>
 #include <QDebug>
 #include <QTimer>
+#include <QMessageBox>
+#include <QDateTime>
+#include <QProcess>
+#include <QRegularExpression>
 
 FileMonitor::FileMonitor(const QString& path, QObject *parent)
-    : QObject(parent), directoryPath(path), watcher(new QFileSystemWatcher(this)), timer(new QTimer(this)) {
-    loadSignatures("/home/vladimir/Загрузки/Anne/gui_monitor/signatures.cvs"); // Загружаем сигнатуры
-    loadPreviousFilesList(); // Загружаем список предыдущих файлов
-    processingQueue = QQueue<QString>();
-    connect(timer, &QTimer::timeout, this, &FileMonitor::scanDirectory); // Подключаем таймер к функции сканирования
-    timer->start(1000); // Пересканировать каждую 1 секунду.
+    : QObject(parent), directoryPath(path), watcher(new QFileSystemWatcher(this)),defaultAction(Heal)  {
+    loadSignatures("/home/vladimir/Загрузки/Anne/gui_monitor/signatures.cvs");
+    loadPreviousFilesList();
 }
 
-//Запуск мониторинга указанной директории.
 void FileMonitor::startMonitoring() {
     log("Мониторинг папки начат: " + directoryPath);
     qDebug() << "Мониторинг папки начат:" << directoryPath;
-    scanDirectory(); // Начинаем сканирование директории
-    connect(watcher, &QFileSystemWatcher::fileChanged, this, &FileMonitor::onFileChanged); // Подключаем сигнал изменения файла
+
+    // Добавляем саму директорию и все существующие файлы
+    watcher->addPath(directoryPath);
+
+    QDir dir(directoryPath);
+    QStringList files = dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
+
+    // Очищаем предыдущий список и добавляем текущие файлы
+    previousFilesList.clear();
+    for (const QString &file : files) {
+        QString fullPath = dir.absoluteFilePath(file);
+        watcher->addPath(fullPath);
+        previousFilesList.append(fullPath);
+        qDebug() << "Добавлен в watcher:" << fullPath;
+    }
+
+    savePreviousFilesList();
+
+    connect(watcher, &QFileSystemWatcher::fileChanged,
+            this, &FileMonitor::onFileChanged);
+    connect(watcher, &QFileSystemWatcher::directoryChanged,
+            this, &FileMonitor::scanDirectory);
 }
 
-//Сканирование указанной директории на наличие новых или измененных файлов.
 void FileMonitor::scanDirectory() {
     QDir dir(directoryPath);
-    QStringList currentFiles = dir.entryList(QDir::Files | QDir::NoDotAndDotDot); // Получаем список текущих файлов
+    QStringList currentFiles = dir.entryList(QDir::Files | QDir::NoDotAndDotDot);
 
-    // Добавление новых файлов в QFileSystemWatcher
+    // Обновляем список файлов в watcher
+    QStringList watchedFiles = watcher->files();
+    qDebug() << "Текущие файлы в директории:" << currentFiles;
+    qDebug() << "Отслеживаемые файлы:" << watcher->files();
+    // Проверяем новые файлы
     for (const QString& file : currentFiles) {
         QString fullPath = dir.absoluteFilePath(file);
-        if (!previousFilesList.contains(fullPath)) { // Если файл новый
-            watcher->addPath(fullPath); // Добавляем в монитор
-            qDebug() << "Обнаружен новый файл:" << fullPath;
-            log("[Информация] Обнаружен новый файл: " + fullPath);
-            previousFilesList.append(fullPath); // Сохраняем файл в списке
-            processingQueue.enqueue(fullPath); // Добавляем файл в очередь обработки
-            if (processingQueue.size() == 1) {
-                processNextFile(); // Начинаем обработку файла
-            }
-        } else {
-            // Если файл уже существует, добавляем его в watcher, если он еще не добавлен
-            if (!watcher->files().contains(fullPath)) {
-                watcher->addPath(fullPath);
-                qDebug() << "Добавление существующего файла в монитор:" << fullPath;
+
+        if (!watchedFiles.contains(fullPath)) {
+            watcher->addPath(fullPath);
+            if (!previousFilesList.contains(fullPath)) {
+                qDebug() << "Обнаружен новый файл:" << fullPath;
+                log("[Информация] Обнаружен новый файл: " + fullPath);
+                previousFilesList.append(fullPath);
+                processFile(fullPath);
             }
         }
     }
 
-    // Проверка на удаленные файлы
-    for (const QString& previousFile : previousFilesList) {
-        if (!currentFiles.contains(QFileInfo(previousFile).fileName())) {
-            onFileRemoved(previousFile); // Обработка удаления файла
+    // Проверяем удаленные файлы
+    for (const QString& watchedFile : watchedFiles) {
+        if (!currentFiles.contains(QFileInfo(watchedFile).fileName())) {
+            watcher->removePath(watchedFile);
+            onFileRemoved(watchedFile);
         }
     }
 
-    savePreviousFilesList(); // Сохраняем список предыдущих файлов
+    savePreviousFilesList();
 }
 
-//Обрабатка изменений в файле.
-void FileMonitor::onFileChanged(const QString& path) {
+void FileMonitor::onFileChanged(const QString &path) {
+    qDebug() << "Файл изменен:" << path;
+
+    // Если файл временно недоступен (например, при перезаписи)
     if (!QFile::exists(path)) {
-        return; // Если файл не существует, выход
+        QTimer::singleShot(100, [this, path]() {
+            if (QFile::exists(path)) {
+                watcher->addPath(path);
+                processFile(path);
+            }
+        });
+        return;
     }
-    qDebug() << "Файл изменен. Добавление в очередь обработки:" << path;
-    log("[Информация] Файл изменен: " + path);
-    processingQueue.enqueue(path); // Добавляем измененный файл в очередь
-    if (processingQueue.size() == 1) {
-        processNextFile(); // Начинаем обработку файла
-    }
+
+    // Переподписываемся на файл
+    watcher->addPath(path);
+    processFile(path);
 }
 
-//Обрабатка удаления файла.
 void FileMonitor::onFileRemoved(const QString& path) {
     qDebug() << "Файл удален:" << path;
     log("[Информация] Файл удален: " + path);
-    previousFilesList.removeOne(path); // Удаляем файл из списка
-    emit fileDeleted(path); // Извещаем об удалении файла
+    previousFilesList.removeOne(path);
+    savePreviousFilesList();
+    emit fileDeleted(path);
 }
 
-//Проверка файла на наличие сигнатур и выполение соответствующих действий.
-void FileMonitor::processNextFile() {
-    if (processingQueue.isEmpty()) {
-        return; // Выход, если нет файлов для обработки
+void FileMonitor::processFile(const QString &filePath) {
+    if (!QFile::exists(filePath)) {
+        qDebug() << "Файл не существует:" << filePath;
+        return;
     }
 
-    QString filePath = processingQueue.dequeue(); // Получаем следующий файл для обработки
-    qDebug() << "Обработка файла:" << filePath;
-
-    // Логика анализа сигнатур
     if (isInfected(filePath)) {
         qDebug() << "Обнаружен зараженный файл:" << filePath;
         log("[Внимание] Обнаружен зараженный файл:" + filePath);
-        switch (defaultAction) {
-            case Heal:
-                handleInfection(filePath); // Лечим файл
-                break;
-            case Delete:
-                if (!QFile::remove(filePath)) {
-                    qDebug() << "Ошибка при удалении файла:" << filePath;
-                    log("Ошибка при удалении файла: " + filePath);
-                }
-                break;
-            case Ignore:
-                log("[Внимание] Зараженный файл был проигнорирован: " + filePath);
-                break;
-            case Quarantine:
-                moveToQuarantine(filePath); // Перемещение в карантин
-                break;
-        }
+        handleInfection(filePath);
     } else {
         log("[Информация] Файл чист: " + filePath);
     }
-
-    // Продолжить обработку следующего файла
-    if (!processingQueue.isEmpty()) {
-        processNextFile();
-    }
 }
+
 
 // Устанавка действия для обработки зараженных файлов.
 void FileMonitor::setDefaultAction(Action action) {
@@ -214,117 +214,162 @@ bool FileMonitor::archiveWithPassword(const QString& folderPath) {
     }
 }
 
-//Проверка, инфицирован ли файл.
+// Проверка, инфицирован ли файл.
 bool FileMonitor::isInfected(const QString& filePath) {
     QFile file(filePath);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&file);
-        QString line;
-        while (in.readLineInto(&line)) {
-            for (const Signature& signature : signatures) {
-                if (signature.isRegex) {
-                    QRegularExpression regex(signature.pattern);
-                    if (regex.match(line).hasMatch()) {
-                        return true; // Файл инфицирован
-                    }
-                } else {
-                    if (line.contains(signature.pattern, Qt::CaseInsensitive)) {
-                        return true; // Файл инфицирован
-                    }
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "Ошибка открытия файла для сканирования:" << filePath;
+        return false;
+    }
+
+    for (const Signature& signature : signatures) {
+        if (signature.pattern.isEmpty()) continue;
+
+        // Определяем область сканирования
+        qint64 scanSize = qMin<qint64>(file.size(), signature.maxScanSize > 0 ?
+                                      signature.maxScanSize : file.size());
+        qint64 startPos = qMax<qint64>(0, signature.offset);
+
+        // Для больших файлов читаем блоками
+        const qint64 bufferSize = 4096;
+        QByteArray buffer;
+        qint64 bytesRead = 0;
+
+        file.seek(startPos);
+        while (bytesRead < scanSize) {
+            qint64 bytesToRead = qMin(bufferSize, scanSize - bytesRead);
+            buffer = file.read(bytesToRead);
+            bytesRead += buffer.size();
+
+            if (buffer.isEmpty()) break;
+
+            // Поиск сигнатуры в буфере
+            if (buffer.contains(signature.pattern)) {
+                qDebug() << "Найдена сигнатура" << signature.id
+                         << "в файле" << filePath;
+                file.close();
+                return true;
+            }
+
+            // Для regex проверяем как строку
+            if (signature.isRegex) {
+                QString data = QString::fromLatin1(buffer);
+                QRegularExpression regex(QString::fromLatin1(signature.pattern));
+                if (regex.match(data).hasMatch()) {
+                    file.close();
+                    return true;
                 }
             }
         }
     }
-    return false; // Файл не инфицирован
+
+    file.close();
+    return false;
 }
 
 // * Удаление строки с сигнатурами, если действие "Вылечить".
 void FileMonitor::handleInfection(const QString& filePath) {
-    QFile file(filePath);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QStringList lines;
-        QTextStream in(&file);
-        QString line;
-        while (in.readLineInto(&line)) {
-            lines.append(line); // Сохраняем все строки файла
-        }
-        file.close();
-
-        // Если действие "Вылечить", удаляем строки с сигнатурами
-        if (defaultAction == Heal) {
-            QFile outFile(filePath);
-            if (outFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                QTextStream out(&outFile);
-                for (const QString& remainingLine : lines) {
-                    bool isInfected = false; // Флаг для отслеживания зараженной строки
-                    for (const Signature& signature : signatures) {
-                        if (signature.isRegex) {
-                            QRegularExpression regex(signature.pattern);
-                            if (regex.match(remainingLine).hasMatch()) {
-                                isInfected = true; // Устанавливаем флаг
-                                break; // Прерываем цикл, если нашли заражение
-                            }
-                        } else {
-                            if (remainingLine.contains(signature.pattern, Qt::CaseInsensitive)) {
-                                isInfected = true; // Устанавливаем флаг
-                                break; // Прерываем цикл, если нашли заражение
-                            }
-                        }
-                    }
-                    if (!isInfected) {
-                        out << remainingLine << "\n"; // Записываем строку, если она не заражена
-                    }
-                }
-                outFile.close();
-                log("[Информация] Файл был вылечен: " + filePath);
-                qDebug() << "Файл был вылечен: " << filePath;
-            } else {
-                log("Ошибка открытия файла " + filePath + " для записи.");
-                qDebug() << "Ошибка открытия файла " << filePath + " для записи";
-            }
-        }
-    } else {
-        log("Ошибка открытия файла " + filePath + " для чтения.");
-        qDebug() << "Ошибка открытия файла " << filePath + " для чтения";
+    switch(defaultAction) {
+        case Quarantine:
+            moveToQuarantine(filePath);
+            log("[Информация] Файл перемещен в карантин: " + filePath);
+            break;
+        case Delete:
+            QFile::remove(filePath);
+            log("[Информация] Файл удален: " + filePath);
+            break;
+        case Heal:
+            healFile(filePath); // Вынесем лечение в отдельный метод
+            break;
+        case Ignore:
+            log("[Информация] Угроза проигнорирована: " + filePath);
+            break;
+        default:
+            moveToQuarantine(filePath); // Действие по умолчанию
     }
 }
 
+void FileMonitor::healFile(const QString& filePath) {
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadWrite)) {
+        log("Ошибка открытия файла для лечения: " + filePath);
+        return;
+    }
+
+    QByteArray fileData = file.readAll();
+    bool modified = false;
+
+    for (const Signature& signature : signatures) {
+        if (signature.pattern.isEmpty()) continue;
+
+        int pos = 0;
+        while ((pos = fileData.indexOf(signature.pattern, pos)) != -1) {
+            fileData.replace(pos, signature.pattern.size(),
+                           QByteArray(signature.pattern.size(), '\0'));
+            pos += signature.pattern.size();
+            modified = true;
+        }
+    }
+
+    if (modified) {
+        file.resize(0);
+        file.write(fileData);
+        log("[Информация] Файл вылечен: " + filePath);
+    }
+    file.close();
+}
 //Загрузка сигнатур из указанного файла.
 void FileMonitor::loadSignatures(const QString& filename) {
     QFile file(filename);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&file);
-        QString line;
-
-        // Пропускаем первую строку (заголовки)
-        if (!in.readLineInto(&line)) {
-            log("Ошибка чтения заголовка из файла сигнатур: " + filename);
-            return; // Выход, если не удалось прочитать заголовок
-        }
-
-        // Чтение остальных строк
-        while (in.readLineInto(&line)) {
-            if (!line.trimmed().isEmpty()) {
-                QStringList fields = line.split(',', QString::SkipEmptyParts);
-                if (fields.size() == 5) { // Убедимся, что есть 5 полей
-                    Signature sig;
-                    sig.id = fields[0].trimmed();
-                    sig.type = fields[1].trimmed();
-                    sig.description = fields[2].trimmed();
-                    sig.pattern = fields[3].trimmed();
-                    sig.isRegex = (fields[4].trimmed().toLower() == "true");
-                    signatures.append(sig); // Добавляем сигнатуру в вектор
-                    qDebug() << "Загружена сигнатура:" << sig.description << "--->" << sig.pattern;
-                }
-            }
-        }
-        file.close();
-    } else {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         log("Ошибка открытия файла сигнатур: " + filename);
-        qDebug() << "Ошибка открытия файла сигнатур";
+        return;
     }
-}
 
+    QTextStream in(&file);
+    QString line;
+
+    // Пропускаем заголовок
+    if (!in.readLineInto(&line)) return;
+
+    while (in.readLineInto(&line)) {
+        line = line.trimmed();
+        if (line.isEmpty()) continue;
+
+        QStringList fields = line.split(',');
+        if (fields.size() < 5) continue;
+
+        Signature sig;
+        sig.id = fields[0].trimmed();
+        sig.type = fields[1].trimmed();
+        sig.description = fields[2].trimmed();
+
+        // Преобразуем шаблон в бинарный вид
+        QString patternStr = fields[3].trimmed();
+        if (patternStr.startsWith("hex:")) {
+            // HEX-представление: "hex:4D5A90"
+            sig.pattern = QByteArray::fromHex(
+                patternStr.mid(4).toLatin1());
+        } else if (patternStr.startsWith("str:")) {
+            // Строковое представление: "str:MZ"
+            sig.pattern = patternStr.mid(4).toLatin1();
+        } else {
+            // По умолчанию считаем HEX
+            sig.pattern = QByteArray::fromHex(patternStr.toLatin1());
+        }
+
+        sig.isRegex = fields[4].trimmed().compare("true", Qt::CaseInsensitive) == 0;
+        sig.offset = fields.size() > 5 ? fields[5].toLongLong() : 0;
+        sig.maxScanSize = fields.size() > 6 ? fields[6].toLongLong() : 0;
+
+        signatures.append(sig);
+        qDebug() << "Загружена сигнатура:" << sig.description
+                 << "Pattern size:" << sig.pattern.size()
+                 << "Offset:" << sig.offset;
+    }
+
+    file.close();
+}
 // Логирование
 void FileMonitor::log(const QString& message) {
     QFile logFile("log.txt");

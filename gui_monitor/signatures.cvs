@@ -1,4 +1,4 @@
-id,type,description,pattern,isRegex
-1,malware,Example malware signature,pattern1,true
-2,virus,Example virus signature,pattern2,false
-
+id,type,description,pattern,isRegex,offset,maxScanSize
+1,virus,MZ Header,hex:4D5A,false,0,1024
+2,malware,ELF Header,hex:7F454C46,false,0,1024
+3,trojan,PowerShell regex,str:-EncodedCommand,true,0,0

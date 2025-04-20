@@ -22,7 +22,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , defaultAction(Heal) // Установка действия по умолчанию
+    , defaultAction(FileMonitor::Heal) // Установка действия по умолчанию
     , fileMonitor(nullptr) // Инициализация указателя на FileMonitor
     , fileWatcher(new QFileSystemWatcher(this)) // Создание QFileSystemWatcher для отслеживания изменений в файле
 {
@@ -160,13 +160,13 @@ void MainWindow::Settings() {
 
         // Обновление defaultAction в зависимости от выбора пользователя
         if (selectedAction == "Удалить") {
-            defaultAction = Delete;
+            defaultAction = FileMonitor::Delete;
         } else if (selectedAction == "Переместить в карантин") {
-            defaultAction = Quarantine;
+            defaultAction = FileMonitor::Quarantine;
         } else if (selectedAction == "Игнорировать") {
-            defaultAction = Ignore;
+            defaultAction = FileMonitor::Ignore;
         } else if (selectedAction == "Вылечить") {
-            defaultAction = Heal;
+            defaultAction = FileMonitor::Heal;
         }
 
         // Установка действия в FileMonitor

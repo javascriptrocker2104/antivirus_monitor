@@ -2,27 +2,29 @@
 #define ACTIONDIALOG_H
 
 #include <QDialog>
-#include <QRadioButton>
-#include <QPushButton>
-#include <QVBoxLayout>
+#include "filemonitor.h"
 
-// Класс для диалогового окна выбора действия с зараженным файлом
-class ActionDialog : public QDialog {
+class QRadioButton;
+
+class ActionDialog : public QDialog
+{
     Q_OBJECT
 
 public:
-    explicit ActionDialog(QWidget *parent = nullptr); // Конструктор
-    QString selectedAction() const; // Метод для получения выбранного действия
+    explicit ActionDialog(QWidget *parent = nullptr);
+
+    QString selectedAction() const;
+    FileMonitor::Action selectedActionType() const;
 
 private slots:
-    void onConfirm(); // Слот для обработки подтверждения выбора
+    void onConfirm();
 
 private:
-    QRadioButton *deleteRadioButton; // Радиокнопка для удаления
-    QRadioButton *quarantineRadioButton; // Радиокнопка для карантина
-    QRadioButton *ignoreRadioButton; // Радиокнопка для игнорирования
-    QRadioButton *healRadioButton; // Радиокнопка для лечения
-    QString selected; // Хранит выбранное действие
+    QRadioButton *deleteRadioButton;
+    QRadioButton *quarantineRadioButton;
+    QRadioButton *ignoreRadioButton;
+    QRadioButton *healRadioButton;
+    QString selected;
 };
 
 #endif // ACTIONDIALOG_H

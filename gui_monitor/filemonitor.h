@@ -19,25 +19,32 @@
 
 // Структура для хранения сигнатуры вируса
 struct Signature {
-    QString id;          // Идентификатор сигнатуры
-    QString type;        // Тип вируса
-    QString description; // Описание вируса
-    QString pattern;     // Шаблон для проверки
-    bool isRegex;       // Используется ли регулярное выражение
+    QString id;
+    QString type;
+    QString description;
+    QByteArray pattern;  // Изменено с QString на QByteArray
+    bool isRegex;
+    qint64 offset;       // Добавлено: позиция в файле для поиска
+    qint64 maxScanSize;  // Добавлено: максимальный размер сканирования
 };
 
-// Перечисление возможных действий при обнаружении вируса
-enum Action {
-    Heal,
-    Delete,
-    Ignore,
-    Quarantine
-};
+
 
 class FileMonitor : public QObject {
     Q_OBJECT
 
+
 public:
+    // Перечисление возможных действий при обнаружении вируса
+    enum Action {
+        Heal,
+        Delete,
+        Ignore,
+        Quarantine
+    };
+    Q_ENUM(Action)
+
+
     explicit FileMonitor(const QString& path, QObject *parent = nullptr);//Конструктор
     void startMonitoring();   // Начать мониторинг
     void stopMonitoring();    // Остановить мониторинг
@@ -60,8 +67,9 @@ private:
     void log(const QString& message);      // Логирование сообщений
     void savePreviousFilesList();          // Сохранить список ранее обработанных файлов
     void loadPreviousFilesList();          // Загрузить список ранее обработанных файлов
-    void processNextFile();                 // Обработать следующий файл из очереди
+    void processFile(const QString& filePath);                // Обработать следующий файл из очереди
     void onFileRemoved(const QString& path); // Обработчик удаления файла
+    void healFile(const QString& filePath);
 
     QString directoryPath;                  // Путь к директории
     QFileSystemWatcher *watcher;           // Наблюдатель за файловой системой
